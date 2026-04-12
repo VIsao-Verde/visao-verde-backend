@@ -1,0 +1,83 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(dependencies)"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    groups:
+      # Agrupa as dependências do Sentry:
+      sentry-dependencies:
+        patterns:
+          - "@sentry/*"
+          - "sentry-*"
+
+      # Agrupa as dependências do Tiptap:
+      tiptap-dependencies:
+        patterns:
+          - "@tiptap/*"
+
+      # Agrupa as dependências do Prisma:
+      prisma-dependencies:
+        patterns:
+          - "prisma"
+          - "@prisma/*"
+          - "prettier-plugin-prisma"
+
+      # Agrupa as dependências do Fastify:
+      fastify-dependencies:
+        patterns:
+          - "fastify"
+          - "@fastify/*"
+          - "fastify-*"
+
+      # Agrupa as dependências do ESLint (core):
+      eslint-core:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "@typescript-eslint/*"
+
+      # Agrupa as dependências do ESLint (plugins):
+      eslint-plugins:
+        patterns:
+          - "eslint-plugin-*"
+          - "eslint-config-*"
+          - "eslint-compat-*"
+
+      # Agrupa as dependências do Commitlint:
+      commitlint:
+        patterns:
+          - "@commitlint/*"
+          - "commitlint"
+
+      # Agrupa todas as atualizações de versões non-breaking (Fallback):
+      all-minor-patches:
+        patterns:
+          - "*"
+
+        update-types:
+          - "minor"
+          - "patch"
+
+        exclude-patterns:
+          - "@sentry/*"
+          - "sentry-*"
+          - "@tiptap/*"
+          - "prisma"
+          - "@prisma/*"
+          - "prettier-plugin-prisma"
+          - "fastify"
+          - "@fastify/*"
+          - "fastify-*"
+          - "eslint"
+          - "@eslint/*"
+          - "@typescript-eslint/*"
+          - "eslint-plugin-*"
+          - "eslint-config-*"
+          - "eslint-compat-*"
+          - "@commitlint/*"
+          - "commitlint"

@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:18-alpine3.23
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', '${POSTGRES_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # redis:
+  #   image: redis:8.2.2-bookworm@sha256:4521b581dbddea6e7d81f8fe95ede93f5648aaa66a9dacd581611bf6fe7527bd
+  #   container_name: ${REDIS_CONTAINER_NAME:-astrobio-redis}
+  #   restart: on-failure:5
+  #   env_file: .env
+  #   ports:
+  #     - "${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}:6379"
+  #   volumes:
+  #     - redis_data:/redis
+  #     - ./redis.conf:/usr/local/etc/redis/redis.conf
+  #   # networks:
+  #   #   - app-network
+  #   command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--requirepass", "${REDIS_PASSWORD}", "--bind", "0.0.0.0", "--port", "${REDIS_PORT:-6379}"]
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 30s
+
+  # app:
+  #   build: .
+  #   ports:
+  #     - '${APP_PORT}:3000'
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
+  #   command: ${COMMAND}
+
+volumes:
+  postgres_data:
+    driver: local
+  # redis_data:
+  #   driver: local
+#   backend_uploads:
+#     driver: local
+
+networks:
+  app-network:
+    driver: bridge
