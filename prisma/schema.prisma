@@ -22,6 +22,8 @@ enum AuthenticationStatus {
   BLOCKED
 }
 
+
+
 enum UserRole {
   ADMIN
   DEFAULT
@@ -41,6 +43,19 @@ model AuthenticationAudit {
 
   @@index([userId, createdAt], name: "idx_auth_audit_user_date")
   @@map("authentication_audit")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid(7))
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId], name: "idx_password_reset_user")
+  @@map("password_reset_tokens")
 }
 
 model User {
@@ -63,9 +78,90 @@ model User {
   passwordChangedAt DateTime? @map("password_changed_at")
 
   authenticationAudits AuthenticationAudit[]
+  passwordResetTokens PasswordResetToken[]
+
+  reviews   Review[]
 
   @@index([name], name: "idx_user_name")
   @@index([token], name: "idx_user_token")
   @@map("users")
 }
+
+
+enum Rating {
+  one
+  two
+  three
+  four
+  five
+}
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Rating      
+  comment   String?
+
+  userId    Int
+  parkId    Int
+
+  user      User     @relation(fields: [userId], references: [id])
+  park      Park     @relation(fields: [parkId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("reviews")
+}
+
+enum Difficulty {
+  easy
+  moderate
+  hard
+}
+model Trail {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+
+  distanceKm  Float
+  durationMin Int?
+
+  difficulty  Difficulty
+
+  parkId      Int
+  park        Park     @relation(fields: [parkId], references: [id])
+
+  createdAt   DateTime @default(now())
+
+  @@map("trails")
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+
+  parkId    Int
+  park      Park     @relation(fields: [parkId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("images")
+}
+
+model Park {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  city        String
+
+  latitude    Float
+  longitude   Float
+
+  createdAt   DateTime @default(now())
+
+  images      Image[]
+  trails      Trail[]
+  reviews     Review[]
+
+  @@map("parks")
+}
+
 
