@@ -139,6 +139,7 @@ model Image {
   @@map("images")
 }
 
+
 model Park {
   id          Int      @id @default(autoincrement())
   name        String
