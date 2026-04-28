@@ -22,6 +22,8 @@ enum AuthenticationStatus {
   BLOCKED
 }
 
+
+
 enum UserRole {
   ADMIN
   DEFAULT
@@ -42,6 +44,7 @@ model AuthenticationAudit {
   @@index([userId, createdAt], name: "idx_auth_audit_user_date")
   @@map("authentication_audit")
 }
+
 
 model User {
   id            Int       @id @default(autoincrement())
@@ -64,8 +67,95 @@ model User {
 
   authenticationAudits AuthenticationAudit[]
 
+  reviews   Review[]
+
   @@index([name], name: "idx_user_name")
   @@index([token], name: "idx_user_token")
   @@map("users")
 }
+
+
+enum Rating {
+  one
+  two
+  three
+  four
+  five
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Rating      
+  comment   String?
+
+  userId    Int
+  parkId    Int
+
+  user      User     @relation(fields: [userId], references: [id])
+  park      Park     @relation(fields: [parkId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("reviews")
+}
+
+
+
+enum Difficulty {
+  easy
+  moderate
+  hard
+}
+
+
+model Trail {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+
+  distanceKm  Float
+  durationMin Int?
+
+  difficulty  Difficulty
+
+  parkId      Int
+  park        Park     @relation(fields: [parkId], references: [id])
+
+  createdAt   DateTime @default(now())
+
+  @@map("trails")
+}
+
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+
+  parkId    Int
+  park      Park     @relation(fields: [parkId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("images")
+}
+
+
+model Park {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  city        String
+
+  latitude    Float
+  longitude   Float
+
+  createdAt   DateTime @default(now())
+
+  images      Image[]
+  trails      Trail[]
+  reviews     Review[]
+
+  @@map("parks")
+}
+
 
