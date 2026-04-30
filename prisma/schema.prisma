@@ -150,6 +150,7 @@ model Park {
   longitude   Float
 
   createdAt   DateTime @default(now())
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
   images      Image[]
   trails      Trail[]
