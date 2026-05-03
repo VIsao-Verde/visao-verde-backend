@@ -10,7 +10,7 @@ const envSchema = z.object({
 
   // App
   APP_NAME: z.string().default('Backend Template Reborn'),
-  APP_PORT: z.coerce.number().default(3000),
+  PORT: z.coerce.number().default(3000),
   JWT_SECRET: z.string().min(60, 'JWT secret must be at least 60 characters long'),
   FRONTEND_URL: z.url().default('http://localhost:5173'),
   HASH_SALT_ROUNDS: z.coerce.number().default(12),

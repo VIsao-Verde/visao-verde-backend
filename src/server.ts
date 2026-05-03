@@ -4,9 +4,9 @@ import { logger } from '@lib/logger/index.js'
 import { app } from './app.js'
 
 app
-  .listen({ host: '0.0.0.0', port: env.APP_PORT })
+  .listen({ host: '0.0.0.0', port: env.PORT })
   .then(() => {
-    logger.info(`Server started successfully! Listening on: ${env.APP_PORT}`)
+    logger.info(`Server started successfully! Listening on: ${env.PORT}`)
   })
   .catch((err) => {
     logError(err, {}, 'Failed to start server')

@@ -40,7 +40,7 @@ services:
   # app:
   #   build: .
   #   ports:
-  #     - '${APP_PORT}:3000'
+  #     - '${PORT}:3000'
   #   env_file:
   #     - .env
   #   volumes:
