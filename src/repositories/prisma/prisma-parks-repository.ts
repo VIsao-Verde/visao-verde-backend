@@ -1,5 +1,5 @@
 import { prisma } from '@lib/prisma/index.js'
-import { ParkRepository } from '@repositories/parks-repository.js'
+import type { ParkRepository } from '@repositories/parks-repository.js'
 import type { Prisma } from '@/@types/prisma/client.js'
 
 export class PrismaParksRepository implements ParkRepository {

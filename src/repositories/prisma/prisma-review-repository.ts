@@ -1,5 +1,5 @@
 import { prisma } from '@lib/prisma/index.js'
-import { ReviewRepository, ReviewData } from '@repositories/reviews-repository.js'
+import type { ReviewRepository, ReviewData } from '@repositories/reviews-repository.js'
 import type { Prisma } from '@/@types/prisma/client.js'
 
 export class PrismaReviewRepository implements ReviewRepository {
