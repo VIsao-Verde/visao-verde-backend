@@ -142,6 +142,7 @@ model Image {
 
 model Park {
   id          Int      @id @default(autoincrement())
+  publicId      String    @unique @default(uuid(7)) @map("public_id")
   name        String
   description String?
   city        String
@@ -150,7 +151,7 @@ model Park {
   longitude   Float
 
   createdAt   DateTime @default(now())
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   images      Image[]
   trails      Trail[]

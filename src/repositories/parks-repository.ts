@@ -1,4 +1,4 @@
-import type { Prisma, Park, Image, Trail } from '@/@types/prisma/client.js'
+import type { Image, Park, Prisma, Trail } from '@/@types/prisma/client.js'
 
 export interface ParkRepository {
   create(data: Prisma.ParkCreateInput): Promise<Park>
@@ -16,6 +16,3 @@ export interface ParkRepository {
   deleteImage(imageId: number): Promise<Image>
   deleteTrail(trailId: number): Promise<Trail>
 }
-
-
-

@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { env } from '@env/index.js'
-import pino, { multistream, type StreamEntry, type LoggerOptions } from 'pino'
+import pino, { type LoggerOptions, multistream, type StreamEntry } from 'pino'
 
 const asyncLocalStorage = new AsyncLocalStorage<{ requestId: string; userId?: string }>()
 

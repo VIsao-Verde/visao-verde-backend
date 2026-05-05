@@ -1,4 +1,4 @@
-import type { Prisma, Review, Rating } from '@/@types/prisma/client.js'
+import type { Prisma, Rating, Review } from '@/@types/prisma/client.js'
 
 export interface ReviewData {
   rating: Rating
