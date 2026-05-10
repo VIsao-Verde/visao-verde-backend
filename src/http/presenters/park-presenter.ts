@@ -1,5 +1,5 @@
-import type { Park } from '@/@types/prisma/client.js'
 import type { ParkWithDistance, ParkWithRelations } from '@repositories/parks-repository.js'
+import type { Park } from '@/@types/prisma/client.js'
 import type { Rating } from '@/@types/prisma/enums.js'
 
 const ratingToNumber: Record<Rating, number> = {
@@ -73,11 +73,8 @@ export class ParkPresenter {
   static toHTTPWithRelations(park: ParkWithRelations): HTTPParkWithRelations {
     const avg =
       park.reviews.length > 0
-        ? Math.round(
-            (park.reviews.reduce((sum, r) => sum + ratingToNumber[r.rating], 0) /
-              park.reviews.length) *
-              10,
-          ) / 10
+        ? Math.round((park.reviews.reduce((sum, r) => sum + ratingToNumber[r.rating], 0) / park.reviews.length) * 10) /
+          10
         : null
 
     return {

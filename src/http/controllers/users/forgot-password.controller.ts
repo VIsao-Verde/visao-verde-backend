@@ -3,9 +3,9 @@ import { forgotPasswordSchema } from '@http/schemas/users/forgot-password-schema
 import { logger } from '@lib/logger/index.js'
 import { makeForgotPasswordUseCase } from '@use-cases/factories/make-forgot-password-use-case.js'
 import { makeSendEmailUseCase } from '@use-cases/factories/make-send-email-use-case.js'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { forgotPasswordHtmlTemplate } from '@/templates/forgot-password/forgot-password-html.js'
 import { forgotPasswordTextTemplate } from '@/templates/forgot-password/forgot-password-text.js'
-import type { FastifyReply, FastifyRequest } from 'fastify'
 
 export async function forgotPassword(request: FastifyRequest, reply: FastifyReply) {
   const { login } = forgotPasswordSchema.parse(request.body)
