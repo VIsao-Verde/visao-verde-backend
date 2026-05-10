@@ -1,7 +1,7 @@
 import { logError } from '@lib/logger/helpers.js'
 import { logger } from '@lib/logger/index.js'
 import { prisma } from '@lib/prisma/index.js'
-import type { FastifyRequest, FastifyReply } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 export async function healthCheck(_request: FastifyRequest, reply: FastifyReply) {
   const startTime = Date.now()

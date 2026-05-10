@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from 'zod'
 
 export const addParkSchema = z.object({
   name: z.string().trim().min(4).max(255),

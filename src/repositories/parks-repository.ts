@@ -1,21 +1,30 @@
-import type { Prisma, Park, Image, Trail } from '@/@types/prisma/client.js'
+import type { Image, Park, Prisma, Trail } from '@/@types/prisma/client.js'
+
+export type ParkWithRelations = Prisma.ParkGetPayload<{
+  include: {
+    trails: true
+    images: true
+    reviews: { include: { user: { select: { id: true; name: true } } } }
+  }
+}>
+
+export type ParkWithDistance = Park & { distanceKm: number }
 
 export interface ParkRepository {
   create(data: Prisma.ParkCreateInput): Promise<Park>
   findBy(where: Prisma.ParkWhereUniqueInput): Promise<Park | null>
+  findByWithRelations(where: Prisma.ParkWhereUniqueInput): Promise<ParkWithRelations | null>
+  findNearby(lat: number, lon: number, radiusKm: number): Promise<ParkWithDistance[]>
   list(): Promise<Park[]>
-  update(id: number, data: Prisma.ParkUpdateInput): Promise<Park>
-  delete(id: number): Promise<Park>
+  update(id: string, data: Prisma.ParkUpdateInput): Promise<Park>
+  delete(id: string): Promise<Park>
 
-  addImage(parkId: number, imageData: Prisma.ImageCreateInput): Promise<Image>
-  addTrail(parkId: number, trailData: Prisma.TrailCreateInput): Promise<Trail>
+  addImage(parkId: string, imageData: Prisma.ImageCreateInput): Promise<Image>
+  addTrail(parkId: string, trailData: Prisma.TrailCreateInput): Promise<Trail>
 
-  listImages(parkId: number): Promise<Image[]>
-  listTrails(parkId: number): Promise<Trail[]>
+  listImages(parkId: string): Promise<Image[]>
+  listTrails(parkId: string): Promise<Trail[]>
 
-  deleteImage(imageId: number): Promise<Image>
-  deleteTrail(trailId: number): Promise<Trail>
+  deleteImage(imageId: string): Promise<Image>
+  deleteTrail(trailId: string): Promise<Trail>
 }
-
-
-

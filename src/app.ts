@@ -1,21 +1,23 @@
-import { messages } from '@constants/messages.js'
 import { env } from '@env/index.js'
 import fastifyCors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
+import { registerDocs } from '@http/docs.js'
+import { registerErrorHandler } from '@http/error-handler.js'
 import { appRoutes } from '@http/routes.js'
-import { logError } from '@lib/logger/helpers.js'
 import { logger, runWithRequestId, runWithUserContext } from '@lib/logger/index.js'
 import * as Sentry from '@sentry/node'
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import fastify from 'fastify'
 import { v7 as uuidv7 } from 'uuid'
-import z, { ZodError } from 'zod'
+import z from 'zod'
 
 z.config(z.locales.pt())
 
 export const app = fastify({
   logger: false,
 })
+
+app.setValidatorCompiler(() => () => true)
 
 if (env.SENTRY_DSN) {
   Sentry.init({
@@ -88,28 +90,10 @@ app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
 })
 
+if (env.NODE_ENV !== 'production') {
+  app.register(registerDocs)
+}
+
 app.register(appRoutes)
 
-app.setErrorHandler((error, _request, reply) => {
-  if (error instanceof ZodError) {
-    logger.debug(z.treeifyError(error), 'Validation error occurred')
-
-    return reply.status(400).send({ message: messages.validation.invalidData, details: z.treeifyError(error) })
-  }
-
-  if (error instanceof SyntaxError) {
-    logger.error(error, 'JSON inválido recebido')
-    return reply.status(400).send({ message: messages.validation.invalidJson })
-  }
-
-  if (env.NODE_ENV === 'development') {
-    logError(error, {}, 'Unhandled error occurred')
-  } else {
-    if (env.SENTRY_DSN) {
-      Sentry.captureException(error)
-    }
-    logger.error('Unhandled error occurred')
-  }
-
-  reply.status(500).send({ message: messages.errors.internalServer })
-})
+registerErrorHandler(app)

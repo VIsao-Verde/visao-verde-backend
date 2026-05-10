@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output = "../src/@types/prisma"
@@ -22,8 +19,6 @@ enum AuthenticationStatus {
   BLOCKED
 }
 
-
-
 enum UserRole {
   ADMIN
   DEFAULT
@@ -36,7 +31,7 @@ model AuthenticationAudit {
   userAgent  String?              @map("user_agent")
   origin     String?
   status     AuthenticationStatus
-  userId     Int?                 @map("user_id")
+  userId     String?              @map("user_id")
   user       User?                @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -45,10 +40,8 @@ model AuthenticationAudit {
   @@map("authentication_audit")
 }
 
-
 model User {
-  id            Int       @id @default(autoincrement())
-  publicId      String    @unique @default(uuid(7)) @map("public_id")
+  id            String    @id @default(uuid(7))
   name          String
   username      String    @unique
   email         String    @unique
@@ -58,22 +51,20 @@ model User {
   lastLogin     DateTime? @map("last_login")
   role          UserRole  @default(DEFAULT)
 
-  token          String?    @unique
-  tokenExpiresAt DateTime?  @map("token_expires_at")
+  token          String?   @unique
+  tokenExpiresAt DateTime? @map("token_expires_at")
 
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
   passwordChangedAt DateTime? @map("password_changed_at")
 
   authenticationAudits AuthenticationAudit[]
-
-  reviews   Review[]
+  reviews              Review[]
 
   @@index([name], name: "idx_user_name")
   @@index([token], name: "idx_user_token")
   @@map("users")
 }
-
 
 enum Rating {
   one
@@ -84,22 +75,20 @@ enum Rating {
 }
 
 model Review {
-  id        Int      @id @default(autoincrement())
-  rating    Rating      
-  comment   String?
+  id      String  @id @default(uuid(7))
+  rating  Rating
+  comment String?
 
-  userId    Int
-  parkId    Int
+  userId String @map("user_id")
+  parkId String @map("park_id")
 
-  user      User     @relation(fields: [userId], references: [id])
-  park      Park     @relation(fields: [parkId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  park Park @relation(fields: [parkId], references: [id])
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("reviews")
 }
-
-
 
 enum Difficulty {
   easy
@@ -107,56 +96,51 @@ enum Difficulty {
   hard
 }
 
-
 model Trail {
-  id          Int      @id @default(autoincrement())
+  id          String  @id @default(uuid(7))
   name        String
   description String?
 
   distanceKm  Float
   durationMin Int?
 
-  difficulty  Difficulty
+  difficulty Difficulty
 
-  parkId      Int
-  park        Park     @relation(fields: [parkId], references: [id])
+  parkId String @map("park_id")
+  park   Park   @relation(fields: [parkId], references: [id])
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("trails")
 }
 
-
 model Image {
-  id        Int      @id @default(autoincrement())
-  url       String
+  id  String @id @default(uuid(7))
+  url String
 
-  parkId    Int
-  park      Park     @relation(fields: [parkId], references: [id])
+  parkId String @map("park_id")
+  park   Park   @relation(fields: [parkId], references: [id])
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("images")
 }
 
-
 model Park {
-  id          Int      @id @default(autoincrement())
+  id          String  @id @default(uuid(7))
   name        String
   description String?
   city        String
 
-  latitude    Float
-  longitude   Float
+  latitude  Float
+  longitude Float
 
-  createdAt   DateTime @default(now())
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  images      Image[]
-  trails      Trail[]
-  reviews     Review[]
+  images  Image[]
+  trails  Trail[]
+  reviews Review[]
 
   @@map("parks")
 }
-
-

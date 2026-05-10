@@ -5,7 +5,7 @@ import { hash } from 'bcryptjs'
 import type { User } from '@/@types/prisma/client.js'
 
 interface UpdateUserUseCaseRequest {
-  publicId: string
+  id: string
   name?: string
   email?: string
   username?: string
@@ -20,10 +20,10 @@ type UpdateUserUseCaseResponse = {
 export class UpdateUserUseCase {
   constructor(private usersRepository: UserRepository) {}
 
-  async execute({ publicId, password, ...data }: UpdateUserUseCaseRequest): Promise<UpdateUserUseCaseResponse> {
-    const userToUpdate = await this.usersRepository.findBy({ publicId })
+  async execute({ id, password, ...data }: UpdateUserUseCaseRequest): Promise<UpdateUserUseCaseResponse> {
+    const userExists = await this.usersRepository.findBy({ id })
 
-    if (!userToUpdate) throw new ResourceNotFoundError()
+    if (!userExists) throw new ResourceNotFoundError()
 
     let passwordHash: string | undefined
     let passwordChangedAt: Date | undefined
@@ -33,7 +33,7 @@ export class UpdateUserUseCase {
       passwordChangedAt = new Date()
     }
 
-    const user = await this.usersRepository.update(userToUpdate.id, {
+    const user = await this.usersRepository.update(id, {
       passwordHash,
       passwordChangedAt,
       ...data,
