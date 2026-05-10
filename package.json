@@ -6,6 +6,7 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "build": "tsup src --minify",
     "start:dev": "tsx watch --env-file=.env --no-deprecation src/server.ts",
