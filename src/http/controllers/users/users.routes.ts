@@ -1,3 +1,4 @@
+import { UserRole } from '@/@types/prisma/enums.js'
 import { verifyJwt } from '@middlewares/verify-jwt.middleware.js'
 import { verifyUserRole } from '@middlewares/verify-user-role.middleware.js'
 import { authenticateSchema } from '@schemas/users/authenticate-schema.js'
@@ -8,7 +9,6 @@ import { updateSchema } from '@schemas/users/update-schema.js'
 import { idSchema } from '@schemas/utils/public-id-schema.js'
 import type { FastifyInstance } from 'fastify'
 import z from 'zod'
-import { UserRole } from '@/@types/prisma/enums.js'
 import { authenticateUser } from './authenticate-user.controller.js'
 import { deleteUser, deleteUserById } from './delete-user.controller.js'
 import { forgotPassword } from './forgot-password.controller.js'
@@ -17,6 +17,8 @@ import { listUsers } from './list-users.controller.js'
 import { register, registerAdmin } from './register-user.controller.js'
 import { resetPassword } from './reset-password.controller.js'
 import { updateUser, updateUserById } from './update-user.controller.js'
+
+const doc = (s: z.ZodType) => z.toJSONSchema(s, { unrepresentable: 'any' })
 
 export async function usersRoutes(app: FastifyInstance) {
   app.post(
@@ -28,7 +30,7 @@ export async function usersRoutes(app: FastifyInstance) {
         summary: 'Register an admin user',
         description: 'Requires ADMIN role.',
         security: [{ bearerAuth: [] }],
-        body: z.toJSONSchema(registerSchema),
+        body: doc(registerSchema),
       },
     },
     registerAdmin,
@@ -40,7 +42,7 @@ export async function usersRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Users'],
         summary: 'Register a new user',
-        body: z.toJSONSchema(registerSchema),
+        body: doc(registerSchema),
       },
     },
     register,
@@ -53,7 +55,7 @@ export async function usersRoutes(app: FastifyInstance) {
         tags: ['Auth'],
         summary: 'Authenticate user',
         description: 'Returns a JWT token valid for 1 day.',
-        body: z.toJSONSchema(authenticateSchema),
+        body: doc(authenticateSchema),
       },
     },
     authenticateUser,
@@ -66,7 +68,7 @@ export async function usersRoutes(app: FastifyInstance) {
         tags: ['Auth'],
         summary: 'Request password reset',
         description: 'Sends a reset link to the email if found. Always returns 200 to avoid user enumeration.',
-        body: z.toJSONSchema(forgotPasswordSchema),
+        body: doc(forgotPasswordSchema),
       },
     },
     forgotPassword,
@@ -79,7 +81,7 @@ export async function usersRoutes(app: FastifyInstance) {
         tags: ['Auth'],
         summary: 'Reset password',
         description: 'Resets the password using a token received by email.',
-        body: z.toJSONSchema(resetPasswordSchema),
+        body: doc(resetPasswordSchema),
       },
     },
     resetPassword,
@@ -93,7 +95,7 @@ export async function usersRoutes(app: FastifyInstance) {
         tags: ['Users'],
         summary: 'Update own profile',
         security: [{ bearerAuth: [] }],
-        body: z.toJSONSchema(updateSchema),
+        body: doc(updateSchema),
       },
     },
     updateUser,
@@ -134,8 +136,8 @@ export async function usersRoutes(app: FastifyInstance) {
         summary: 'Update user by ID',
         description: 'Requires ADMIN role.',
         security: [{ bearerAuth: [] }],
-        params: z.toJSONSchema(idSchema),
-        body: z.toJSONSchema(updateSchema),
+        params: doc(idSchema),
+        body: doc(updateSchema),
       },
     },
     updateUserById,
@@ -150,7 +152,7 @@ export async function usersRoutes(app: FastifyInstance) {
         summary: 'Delete user by ID',
         description: 'Requires ADMIN role.',
         security: [{ bearerAuth: [] }],
-        params: z.toJSONSchema(idSchema),
+        params: doc(idSchema),
       },
     },
     deleteUserById,
@@ -165,7 +167,7 @@ export async function usersRoutes(app: FastifyInstance) {
         summary: 'Get user by ID',
         description: 'Requires ADMIN role.',
         security: [{ bearerAuth: [] }],
-        params: z.toJSONSchema(idSchema),
+        params: doc(idSchema),
       },
     },
     getUserById,

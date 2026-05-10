@@ -14,6 +14,8 @@ import { list } from './list-parks.controller.js'
 import { listNearby } from './list-parks-by-proximity.controller.js'
 import { update } from './update-park.controller.js'
 
+const doc = (s: z.ZodType) => z.toJSONSchema(s, { unrepresentable: 'any' })
+
 export async function parkRouts(app: FastifyInstance) {
   app.post('/add', {
     onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])],
@@ -22,7 +24,7 @@ export async function parkRouts(app: FastifyInstance) {
       summary: 'Create a new park',
       description: 'Requires ADMIN role.',
       security: [{ bearerAuth: [] }],
-      body: z.toJSONSchema(addParkSchema),
+      body: doc(addParkSchema),
     },
   }, add)
 
@@ -42,7 +44,7 @@ export async function parkRouts(app: FastifyInstance) {
       summary: 'Find parks by proximity',
       description: 'Returns parks within the given radius (km) of the coordinates.',
       security: [{ bearerAuth: [] }],
-      querystring: z.toJSONSchema(nearbyParksSchema),
+      querystring: doc(nearbyParksSchema),
     },
   }, listNearby)
 
@@ -53,7 +55,7 @@ export async function parkRouts(app: FastifyInstance) {
       summary: 'Get park details',
       description: 'Returns park with trails, images, reviews, and average rating.',
       security: [{ bearerAuth: [] }],
-      params: z.toJSONSchema(idSchema),
+      params: doc(idSchema),
     },
   }, find)
 
@@ -64,8 +66,8 @@ export async function parkRouts(app: FastifyInstance) {
       summary: 'Update a park',
       description: 'Requires ADMIN role.',
       security: [{ bearerAuth: [] }],
-      params: z.toJSONSchema(idSchema),
-      body: z.toJSONSchema(updateSchema),
+      params: doc(idSchema),
+      body: doc(updateSchema),
     },
   }, update)
 
@@ -76,7 +78,7 @@ export async function parkRouts(app: FastifyInstance) {
       summary: 'Delete a park',
       description: 'Requires ADMIN role.',
       security: [{ bearerAuth: [] }],
-      params: z.toJSONSchema(idSchema),
+      params: doc(idSchema),
     },
   }, deletePark)
 }
