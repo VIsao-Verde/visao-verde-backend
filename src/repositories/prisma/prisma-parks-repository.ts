@@ -34,8 +34,7 @@ export class PrismaParksRepository implements ParkRepository {
         const dLat = toRad(park.latitude - lat)
         const dLon = toRad(park.longitude - lon)
         const a =
-          Math.sin(dLat / 2) ** 2 +
-          Math.cos(toRad(lat)) * Math.cos(toRad(park.latitude)) * Math.sin(dLon / 2) ** 2
+          Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat)) * Math.cos(toRad(park.latitude)) * Math.sin(dLon / 2) ** 2
         const distanceKm = Math.round(6371 * 2 * Math.asin(Math.sqrt(a)) * 100) / 100
         return { ...park, distanceKm }
       })

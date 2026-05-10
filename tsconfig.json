@@ -22,9 +22,9 @@
       "@tps/*": ["./src/@types/*"],
       "@utils/*": ["./src/utils/*"],
       "@templates/*": ["./src/templates/*"],
-      "@schemas/*": ["./src/http/schemas/*"],
+      "@schemas/*": ["./src/http/schemas/*"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "prisma"]
