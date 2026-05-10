@@ -1,16 +1,16 @@
 import { prisma } from '@lib/prisma/index.js'
 import type { ReviewData, ReviewRepository } from '@repositories/reviews-repository.js'
-import type { Prisma } from '@/@types/prisma/client.js'
+import type { Prisma, Review } from '@/@types/prisma/client.js'
 
 export class PrismaReviewRepository implements ReviewRepository {
-  async create(userId: number, parkId: number, reviewData: ReviewData) {
+  async create(userId: string, parkId: string, reviewData: ReviewData) {
     return await prisma.review.create({
       data: {
         ...reviewData,
-        Park: {
+        park: {
           connect: { id: parkId },
         },
-        User: {
+        user: {
           connect: { id: userId },
         },
       },
@@ -22,22 +22,16 @@ export class PrismaReviewRepository implements ReviewRepository {
       where,
     })
   }
-  async listByPark(parkId: string) {
-    return await prisma.review.findMany({
-      where: {
-        parkId,
-      },
-    })
+
+  async listByPark(parkId: string): Promise<Review[]> {
+    return await prisma.review.findMany({ where: { parkId } })
   }
 
-  async listByUser(userId: string): Promise<Prisma[]> {
-    return await prisma.review.findMany({
-      where: {
-        userId,
-      },
-    })
+  async listByUser(userId: string): Promise<Review[]> {
+    return await prisma.review.findMany({ where: { userId } })
   }
-  async delete(id: number) {
+
+  async delete(id: string) {
     return await prisma.review.delete({
       where: { id },
     })
