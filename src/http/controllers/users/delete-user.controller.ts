@@ -1,4 +1,4 @@
-import { publicIdSchema } from '@http/schemas/utils/public-id-schema.js'
+import { idSchema } from '@http/schemas/utils/public-id-schema.js'
 import { logger } from '@lib/logger/index.js'
 import { ResourceNotFoundError } from '@use-cases/errors/resource-not-found-error.js'
 import { makeDeleteUserUseCase } from '@use-cases/factories/make-delete-user-use-case.js'
@@ -8,9 +8,7 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
   try {
     const deleteUserUseCase = makeDeleteUserUseCase()
 
-    await deleteUserUseCase.execute({
-      publicId: request.user.sub,
-    })
+    await deleteUserUseCase.execute({ id: request.user.sub })
 
     logger.info('User deleted successfully!')
 
@@ -24,17 +22,15 @@ export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-export async function deleteUserByPublicId(request: FastifyRequest, reply: FastifyReply) {
+export async function deleteUserById(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { publicId } = publicIdSchema.parse(request.params)
+    const { id } = idSchema.parse(request.params)
 
     const deleteUserUseCase = makeDeleteUserUseCase()
 
-    await deleteUserUseCase.execute({
-      publicId,
-    })
+    await deleteUserUseCase.execute({ id })
 
-    logger.info({ targetId: publicId }, 'User deleted successfully!')
+    logger.info({ targetId: id }, 'User deleted successfully!')
 
     return reply.status(204).send()
   } catch (error) {

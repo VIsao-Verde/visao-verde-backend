@@ -15,7 +15,7 @@ export async function authenticateUser(request: FastifyRequest, reply: FastifyRe
 
     logger.info('User authenticated successfully!')
 
-    const token = await reply.jwtSign({ sub: user.publicId, role: user.role }, { expiresIn: '1d' })
+    const token = await reply.jwtSign({ sub: user.id, role: user.role }, { expiresIn: '1d' })
 
     return reply.status(200).send({ token, user: UserPresenter.toHTTP(user) })
   } catch (error) {

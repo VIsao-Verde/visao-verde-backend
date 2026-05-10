@@ -25,7 +25,7 @@ export async function forgotPassword(request: FastifyRequest, reply: FastifyRepl
       html: forgotPasswordHtmlTemplate(user.name, token),
     })
 
-    logger.info({ targetId: user.publicId }, 'Password reset email sent')
+    logger.info({ targetId: user.id }, 'Password reset email sent')
 
     return reply.status(200).send({ message: messages.info.passwordResetGeneric })
   } catch (error) {

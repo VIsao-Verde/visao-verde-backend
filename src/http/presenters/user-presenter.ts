@@ -1,4 +1,4 @@
-import type { User, UserRole } from '@prisma/client'
+import type { User, UserRole } from '@/@types/prisma/client.js'
 
 type HTTPUser = {
   id: string
@@ -19,7 +19,7 @@ export class UserPresenter {
     }
 
     return {
-      id: input.publicId,
+      id: input.id,
       name: input.name,
       email: input.email,
       cpf: input.cpf,

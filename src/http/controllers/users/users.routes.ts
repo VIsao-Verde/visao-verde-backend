@@ -3,13 +3,13 @@ import { verifyUserRole } from '@middlewares/verify-user-role.middleware.js'
 import type { FastifyInstance } from 'fastify'
 import { UserRole } from '@/@types/prisma/enums.js'
 import { authenticateUser } from './authenticate-user.controller.js'
-import { deleteUser, deleteUserByPublicId } from './delete-user.controller.js'
+import { deleteUser, deleteUserById } from './delete-user.controller.js'
 import { forgotPassword } from './forgot-password.controller.js'
-import { getUserByPublicId, getUserProfile } from './get-user-profile.controller.js'
+import { getUserById, getUserProfile } from './get-user-profile.controller.js'
 import { listUsers } from './list-users.controller.js'
 import { register, registerAdmin } from './register-user.controller.js'
 import { resetPassword } from './reset-password.controller.js'
-import { updateUser, updateUserByPublicId } from './update-user.controller.js'
+import { updateUser, updateUserById } from './update-user.controller.js'
 
 export async function usersRoutes(app: FastifyInstance) {
   // Register routes:
@@ -27,8 +27,8 @@ export async function usersRoutes(app: FastifyInstance) {
   app.delete('/me', { onRequest: [verifyJwt] }, deleteUser)
 
   // Users administration routes:
-  app.patch('/:publicId', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, updateUserByPublicId)
-  app.delete('/:publicId', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, deleteUserByPublicId)
-  app.get('/:publicId', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, getUserByPublicId)
+  app.patch('/:id', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, updateUserById)
+  app.delete('/:id', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, deleteUserById)
+  app.get('/:id', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, getUserById)
   app.get('/', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, listUsers)
 }

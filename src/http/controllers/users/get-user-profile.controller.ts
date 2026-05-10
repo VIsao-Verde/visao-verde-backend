@@ -1,5 +1,5 @@
 import { UserPresenter } from '@http/presenters/user-presenter.js'
-import { publicIdSchema } from '@http/schemas/utils/public-id-schema.js'
+import { idSchema } from '@http/schemas/utils/public-id-schema.js'
 import { logger } from '@lib/logger/index.js'
 import { ResourceNotFoundError } from '@use-cases/errors/resource-not-found-error.js'
 import { makeGetUserProfileUseCase } from '@use-cases/factories/make-get-user-profile-use-case.js'
@@ -9,7 +9,7 @@ export async function getUserProfile(request: FastifyRequest, reply: FastifyRepl
   try {
     const getUserProfileUseCase = makeGetUserProfileUseCase()
 
-    const { user } = await getUserProfileUseCase.execute({ publicId: request.user.sub })
+    const { user } = await getUserProfileUseCase.execute({ id: request.user.sub })
 
     logger.info('User profile retrieved successfully!')
 
@@ -23,13 +23,13 @@ export async function getUserProfile(request: FastifyRequest, reply: FastifyRepl
   }
 }
 
-export async function getUserByPublicId(request: FastifyRequest, reply: FastifyReply) {
+export async function getUserById(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { publicId } = publicIdSchema.parse(request.params)
+    const { id } = idSchema.parse(request.params)
 
     const getUserProfileUseCase = makeGetUserProfileUseCase()
 
-    const { user } = await getUserProfileUseCase.execute({ publicId: publicId })
+    const { user } = await getUserProfileUseCase.execute({ id })
 
     logger.info('User retrieved successfully!')
 

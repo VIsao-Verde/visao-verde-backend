@@ -21,7 +21,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       role: UserRole.DEFAULT,
     })
 
-    logger.info({ userId: user.publicId }, 'Researcher registered successfully!')
+    logger.info({ userId: user.id }, 'Researcher registered successfully!')
 
     reply.status(201).send({ user: UserPresenter.toHTTP(user) })
   } catch (error) {

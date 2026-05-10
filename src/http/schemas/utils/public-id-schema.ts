@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-export const publicIdSchema = z.object({
-  publicId: z.uuid(),
+export const idSchema = z.object({
+  id: z.string().uuid(),
 })
 
-export type publicIdSchemaType = z.infer<typeof publicIdSchema>
+export type IdSchemaType = z.infer<typeof idSchema>
