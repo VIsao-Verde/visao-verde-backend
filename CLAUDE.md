@@ -45,7 +45,8 @@ Prisma Client     — generated to src/@types/prisma/
 - **Presenter** — maps internal model to HTTP response shape (never exposes raw Prisma models)
 - **Factory** — creates a use-case with its repository dependency injected
 - **Middleware** — `verifyJwt`, `verifyUserRole` — applied via `onRequest` hooks on routes
-- **Error classes** — `src/use-cases/errors/` — domain errors thrown by use-cases, caught by controllers
+- **Error classes** — `src/use-cases/errors/` — domain errors thrown by use-cases, routed by the global error handler
+- **Error handler** — `src/http/error-handler.ts` — `registerErrorHandler(app)` handles `AppError`, `ZodError`, `SyntaxError`, and 500s
 - **Messages** — `src/constants/messages.ts` — all user-facing strings in Portuguese (no inline strings)
 
 ---
@@ -115,23 +116,18 @@ Always include `.js` extension on imports (required for ESM/NodeNext).
 
 ### Controller Pattern
 
+Controllers do **not** contain try/catch. Domain errors propagate to the global error handler automatically.
+
 ```ts
 export async function actionName(request: FastifyRequest, reply: FastifyReply) {
-  try {
-    const { field } = schema.parse(request.body) // or .params / .query
+  const { field } = schema.parse(request.body) // or .params / .query
 
-    const useCase = makeXyzUseCase()
-    const { result } = await useCase.execute({ field })
+  const useCase = makeXyzUseCase()
+  const { result } = await useCase.execute({ field })
 
-    logger.info({ targetId: ... }, 'Action completed successfully!')
+  logger.info({ targetId: ... }, 'Action completed successfully!')
 
-    return reply.status(2xx).send({ result: Presenter.toHTTP(result) })
-  } catch (error) {
-    if (error instanceof KnownDomainError) {
-      return reply.status(4xx).send({ message: error.message })
-    }
-    throw error
-  }
+  return reply.status(2xx).send({ result: Presenter.toHTTP(result) })
 }
 ```
 
@@ -176,8 +172,11 @@ export class ParkPresenter {
 
 ### Error Classes
 
+All domain errors extend `AppError` and declare their own `statusCode`. The global handler in `src/http/error-handler.ts` reads this field automatically — no mapping needed in controllers.
+
 ```ts
-export class ParkNotFoundError extends Error {
+export class ParkNotFoundError extends AppError {
+  readonly statusCode = 404
   constructor() {
     super(messages.validation.parkNotFound) // always use messages constant
   }
