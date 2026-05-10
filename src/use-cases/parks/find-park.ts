@@ -1,22 +1,19 @@
-import type { ParkRepository } from '@repositories/parks-repository.js'
+import type { ParkRepository, ParkWithRelations } from '@repositories/parks-repository.js'
 import { ParkNotFoundError } from '@use-cases/errors/park-not-found-error.js'
-import type { Park } from '@/@types/prisma/client.js'
 
 interface FindParkUseCaseRequest {
-  publicId: string
+  id: string
 }
 
 type FindParkUseCaseResponse = {
-  park: Park
+  park: ParkWithRelations
 }
 
 export class FindParkUseCase {
   constructor(private parksRepository: ParkRepository) {}
 
-  async execute({ publicId }: FindParkUseCaseRequest): Promise<FindParkUseCaseResponse> {
-    const park = await this.parksRepository.findBy({
-      publicId,
-    })
+  async execute({ id }: FindParkUseCaseRequest): Promise<FindParkUseCaseResponse> {
+    const park = await this.parksRepository.findByWithRelations({ id })
 
     if (!park) throw new ParkNotFoundError()
 

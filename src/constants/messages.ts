@@ -6,6 +6,7 @@ export const messages = {
     invalidJson: 'O corpo da requisição não está em formato JSON válido. Verifique a estrutura dos dados enviados.',
     parkAlreadyExists: 'Já existe um parque cadastrado com este nome e cidade.',
     parkNotFound: 'Parque não encontrado.',
+    invalidCoordinates: 'Coordenadas inválidas.',
     passwordTooShort: 'A senha deve ter pelo menos 8 caracteres.',
     passwordTooLong: 'A senha deve ter no máximo 64 caracteres.',
     passwordUppercase: 'A senha deve conter pelo menos uma letra maiúscula.',
