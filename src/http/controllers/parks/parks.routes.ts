@@ -1,7 +1,12 @@
-import { verifyUserRole } from '@middlewares/verify-user-role.middleware.js'
-import type { FastifyInstance } from 'fastify'
 import { UserRole } from '@/@types/prisma/enums.js'
 import { verifyJwt } from '@/http/middlewares/verify-jwt.middleware.js'
+import { verifyUserRole } from '@middlewares/verify-user-role.middleware.js'
+import { addParkSchema } from '@schemas/parks/add-park-schema.js'
+import { nearbyParksSchema } from '@schemas/parks/nearby-parks-schema.js'
+import { updateSchema } from '@schemas/parks/update-schema.js'
+import { idSchema } from '@schemas/utils/public-id-schema.js'
+import type { FastifyInstance } from 'fastify'
+import z from 'zod'
 import { add } from './add-park.controller.js'
 import { deletePark } from './delete-park.controller.js'
 import { find } from './find-park.controller.js'
@@ -10,13 +15,68 @@ import { listNearby } from './list-parks-by-proximity.controller.js'
 import { update } from './update-park.controller.js'
 
 export async function parkRouts(app: FastifyInstance) {
-  app.post('/add', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, add)
+  app.post('/add', {
+    onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])],
+    schema: {
+      tags: ['Parks'],
+      summary: 'Create a new park',
+      description: 'Requires ADMIN role.',
+      security: [{ bearerAuth: [] }],
+      body: z.toJSONSchema(addParkSchema),
+    },
+  }, add)
 
-  app.get('/list', { onRequest: [verifyJwt] }, list)
-  app.get('/nearby', { onRequest: [verifyJwt] }, listNearby)
-  app.get('/:id', { onRequest: [verifyJwt] }, find)
+  app.get('/list', {
+    onRequest: [verifyJwt],
+    schema: {
+      tags: ['Parks'],
+      summary: 'List all parks',
+      security: [{ bearerAuth: [] }],
+    },
+  }, list)
 
-  app.patch('/:id', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, update)
+  app.get('/nearby', {
+    onRequest: [verifyJwt],
+    schema: {
+      tags: ['Parks'],
+      summary: 'Find parks by proximity',
+      description: 'Returns parks within the given radius (km) of the coordinates.',
+      security: [{ bearerAuth: [] }],
+      querystring: z.toJSONSchema(nearbyParksSchema),
+    },
+  }, listNearby)
 
-  app.delete('/:id', { onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])] }, deletePark)
+  app.get('/:id', {
+    onRequest: [verifyJwt],
+    schema: {
+      tags: ['Parks'],
+      summary: 'Get park details',
+      description: 'Returns park with trails, images, reviews, and average rating.',
+      security: [{ bearerAuth: [] }],
+      params: z.toJSONSchema(idSchema),
+    },
+  }, find)
+
+  app.patch('/:id', {
+    onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])],
+    schema: {
+      tags: ['Parks'],
+      summary: 'Update a park',
+      description: 'Requires ADMIN role.',
+      security: [{ bearerAuth: [] }],
+      params: z.toJSONSchema(idSchema),
+      body: z.toJSONSchema(updateSchema),
+    },
+  }, update)
+
+  app.delete('/:id', {
+    onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])],
+    schema: {
+      tags: ['Parks'],
+      summary: 'Delete a park',
+      description: 'Requires ADMIN role.',
+      security: [{ bearerAuth: [] }],
+      params: z.toJSONSchema(idSchema),
+    },
+  }, deletePark)
 }

@@ -1,6 +1,7 @@
 import { env } from '@env/index.js'
 import fastifyCors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
+import { registerDocs } from '@http/docs.js'
 import { registerErrorHandler } from '@http/error-handler.js'
 import { appRoutes } from '@http/routes.js'
 import { logger, runWithRequestId, runWithUserContext } from '@lib/logger/index.js'
@@ -15,6 +16,8 @@ z.config(z.locales.pt())
 export const app = fastify({
   logger: false,
 })
+
+app.setValidatorCompiler(() => () => true)
 
 if (env.SENTRY_DSN) {
   Sentry.init({
@@ -86,6 +89,10 @@ app.register(fastifyCors, {
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
 })
+
+if (env.NODE_ENV !== 'production') {
+  app.register(registerDocs)
+}
 
 app.register(appRoutes)
 
