@@ -1,5 +1,6 @@
 import { verifyUserRole } from '@middlewares/verify-user-role.middleware.js'
 import { addParkSchema } from '@schemas/parks/add-park-schema.js'
+import { imageParamsSchema } from '@schemas/parks/image-params-schema.js'
 import { nearbyParksSchema } from '@schemas/parks/nearby-parks-schema.js'
 import { updateSchema } from '@schemas/parks/update-schema.js'
 import { idSchema } from '@schemas/utils/public-id-schema.js'
@@ -8,7 +9,9 @@ import z from 'zod'
 import { UserRole } from '@/@types/prisma/enums.js'
 import { verifyJwt } from '@/http/middlewares/verify-jwt.middleware.js'
 import { add } from './add-park.controller.js'
+import { addParkImage } from './add-park-image.controller.js'
 import { deletePark } from './delete-park.controller.js'
+import { deleteParkImage } from './delete-park-image.controller.js'
 import { find } from './find-park.controller.js'
 import { list } from './list-parks.controller.js'
 import { listNearby } from './list-parks-by-proximity.controller.js'
@@ -104,5 +107,36 @@ export async function parkRouts(app: FastifyInstance) {
       },
     },
     deletePark,
+  )
+
+  app.post(
+    '/:id/images',
+    {
+      onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])],
+      schema: {
+        tags: ['Parks'],
+        summary: 'Upload an image for a park',
+        description: 'Requires ADMIN role. Accepts multipart/form-data with a single image file (max 5MB, jpeg/png/webp).',
+        security: [{ bearerAuth: [] }],
+        params: doc(idSchema),
+        consumes: ['multipart/form-data'],
+      },
+    },
+    addParkImage,
+  )
+
+  app.delete(
+    '/:id/images/:imageId',
+    {
+      onRequest: [verifyJwt, verifyUserRole([UserRole.ADMIN])],
+      schema: {
+        tags: ['Parks'],
+        summary: 'Delete a park image',
+        description: 'Requires ADMIN role.',
+        security: [{ bearerAuth: [] }],
+        params: doc(imageParamsSchema),
+      },
+    },
+    deleteParkImage,
   )
 }

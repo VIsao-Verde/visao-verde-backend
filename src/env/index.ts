@@ -17,6 +17,10 @@ const envSchema = z.object({
 
   SENTRY_DSN: z.string().optional(),
 
+  // Supabase Storage
+  SUPABASE_URL: z.url(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+
   // SMTP
   SMTP_EMAIL: z.email(),
   SMTP_PASSWORD: z.string().min(1),
