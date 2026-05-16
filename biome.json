@@ -70,7 +70,7 @@
   },
   "overrides": [
     {
-      "includes": ["prisma/**", "src/env/index.ts"],
+      "includes": ["prisma/**", "src/env/index.ts", "scripts/**"],
       "linter": {
         "rules": {
           "suspicious": {
