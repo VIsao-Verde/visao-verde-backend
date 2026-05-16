@@ -1,6 +1,7 @@
 import { env } from '@env/index.js'
 import fastifyCors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
+import fastifyMultipart from '@fastify/multipart'
 import { registerDocs } from '@http/docs.js'
 import { registerErrorHandler } from '@http/error-handler.js'
 import { appRoutes } from '@http/routes.js'
@@ -89,6 +90,8 @@ app.register(fastifyCors, {
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
 })
+
+app.register(fastifyMultipart)
 
 if (env.NODE_ENV !== 'production') {
   app.register(registerDocs)
