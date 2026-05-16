@@ -7,7 +7,7 @@
 | Runtime | Node.js (ESM) |
 | Framework | Fastify 5 |
 | Language | TypeScript 6 (strict) |
-| ORM | Prisma 7 + PostgreSQL |
+| ORM | Prisma 7 + PostgreSQL + PostGIS |
 | Validation | Zod 4 (pt-BR locale) |
 | Auth | @fastify/jwt (JWT, 1d expiry) |
 | Logger | Pino + AsyncLocalStorage (requestId / userId) |
@@ -91,6 +91,14 @@ src/
 │   ├── users/
 │   └── messaging/
 └── server.ts                     # Entry point
+```
+
+Top-level:
+```
+scripts/                          # Standalone data import/seed scripts (tsx --env-file=.env)
+prisma/
+├── schema.prisma
+└── migrations/
 ```
 
 ---
@@ -205,6 +213,42 @@ pnpm exec prisma generate
 
 The client is generated to `src/@types/prisma/` — never import from `@prisma/client`, always use `@/@types/prisma/client.js`.
 
+### PostGIS / GIS Queries
+
+The `Park` model has a `location geography(Point,4326)` column managed by PostGIS. **Never set it manually** — a DB trigger (`parks_location_trigger`) auto-populates it from `latitude`/`longitude` on every insert and update.
+
+Declare PostGIS fields with `Unsupported` in the schema:
+
+```prisma
+location Unsupported("geography(Point,4326)")?
+```
+
+Geographic queries must use `prisma.$queryRaw` with tagged template literals (Prisma parameterizes the values automatically — no SQL injection risk):
+
+```ts
+const rows = await prisma.$queryRaw<Array<{ id: string; distance_m: number }>>`
+  SELECT id, ST_Distance(location, ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography) AS distance_m
+  FROM parks
+  WHERE ST_DWithin(location, ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography, ${radiusMeters})
+  ORDER BY distance_m ASC
+`
+```
+
+Raw SQL columns return snake_case (`created_at`) — map them to camelCase to match Prisma types before returning.
+
+### Data Import Scripts
+
+Standalone scripts live in `scripts/` and are run directly with `tsx`:
+
+```bash
+pnpm exec tsx --env-file=.env scripts/<name>.ts
+```
+
+Scripts import `prisma` from `@lib/prisma/index.js` (the project singleton with the correct adapter). The `--env-file=.env` flag is required because scripts don't go through the normal server bootstrap.
+
+Available scripts:
+- `scripts/import-parks.ts` — fetches parks from DataRio ArcGIS FeatureServer and inserts via Prisma
+
 ---
 
 ## Environment Variables
@@ -228,12 +272,15 @@ The client is generated to `src/@types/prisma/` — never import from `@prisma/c
 ```bash
 pnpm install
 pnpm exec prisma generate
-pnpm exec prisma migrate dev   # apply migrations + regenerate client
-pnpm run start:dev             # tsx watch (development)
-pnpm run build                 # tsup production build
-pnpm run lint:fix              # Biome auto-fix
-pnpm run check                 # Biome format + lint
+pnpm exec prisma migrate deploy  # apply migrations (use deploy, not migrate dev — shadow DB lacks PostGIS)
+pnpm exec prisma generate        # regenerate client after migration
+pnpm run start:dev               # tsx watch (development)
+pnpm run build                   # tsup production build
+pnpm run lint:fix                # Biome auto-fix
+pnpm run check                   # Biome format + lint
 ```
+
+> **Note:** Always use `prisma migrate deploy` instead of `prisma migrate dev`. The `migrate dev` command creates a shadow database that doesn't have PostGIS installed, causing migrations to fail. After deploying, run `prisma generate` separately.
 
 ---
 
