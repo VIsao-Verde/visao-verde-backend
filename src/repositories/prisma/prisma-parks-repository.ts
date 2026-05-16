@@ -25,21 +25,54 @@ export class PrismaParksRepository implements ParkRepository {
   }
 
   async findNearby(lat: number, lon: number, radiusKm: number): Promise<ParkWithDistance[]> {
-    const parks = await prisma.park.findMany()
+    const radiusMeters = radiusKm * 1000
 
-    const toRad = (deg: number) => (deg * Math.PI) / 180
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string
+        name: string
+        description: string | null
+        city: string
+        latitude: number
+        longitude: number
+        created_at: Date
+        updated_at: Date
+        distance_m: number
+      }>
+    >`
+      SELECT
+        id,
+        name,
+        description,
+        city,
+        latitude,
+        longitude,
+        created_at,
+        updated_at,
+        ST_Distance(
+          location,
+          ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography
+        ) AS distance_m
+      FROM parks
+      WHERE ST_DWithin(
+        location,
+        ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography,
+        ${radiusMeters}
+      )
+      ORDER BY distance_m ASC
+    `
 
-    return parks
-      .map((park) => {
-        const dLat = toRad(park.latitude - lat)
-        const dLon = toRad(park.longitude - lon)
-        const a =
-          Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat)) * Math.cos(toRad(park.latitude)) * Math.sin(dLon / 2) ** 2
-        const distanceKm = Math.round(6371 * 2 * Math.asin(Math.sqrt(a)) * 100) / 100
-        return { ...park, distanceKm }
-      })
-      .filter((park) => park.distanceKm <= radiusKm)
-      .sort((a, b) => a.distanceKm - b.distanceKm)
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      city: row.city,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      distanceKm: Math.round((row.distance_m / 1000) * 100) / 100,
+    }))
   }
 
   async list() {
