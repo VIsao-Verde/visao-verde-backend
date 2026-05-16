@@ -12,6 +12,7 @@
 | Auth | @fastify/jwt (JWT, 1d expiry) |
 | Logger | Pino + AsyncLocalStorage (requestId / userId) |
 | Error tracking | Sentry (optional, via `SENTRY_DSN`) |
+| File Storage | Supabase Storage (bucket `park-images`, public) |
 | Email | Nodemailer |
 | Package manager | **pnpm** (never use npm or npx) |
 | Build | tsup |
@@ -236,6 +237,19 @@ const rows = await prisma.$queryRaw<Array<{ id: string; distance_m: number }>>`
 
 Raw SQL columns return snake_case (`created_at`) — map them to camelCase to match Prisma types before returning.
 
+### File Storage (Supabase Storage)
+
+Images are stored in a **public** Supabase Storage bucket named `park-images`. The client singleton lives in `src/lib/supabase/index.ts` and uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS on the server.
+
+Storage path pattern: `parks/{parkId}/{uuid}.{ext}`
+
+Upload and delete logic lives in the use-cases (`AddParkImageUseCase`, `DeleteParkImageUseCase`). Controllers receive the file via `@fastify/multipart` (`request.file()`), validate MIME type and size, then delegate to the use-case. Allowed types: `image/jpeg`, `image/png`, `image/webp`. Max size: 5MB.
+
+The URL saved to the `Image` model is the permanent public URL:
+```
+{SUPABASE_URL}/storage/v1/object/public/park-images/parks/{parkId}/{uuid}.{ext}
+```
+
 ### Data Import Scripts
 
 Standalone scripts live in `scripts/` and are run directly with `tsx`:
@@ -263,6 +277,8 @@ Available scripts:
 | `FRONTEND_URL` | Allowed CORS origin |
 | `HASH_SALT_ROUNDS` | bcrypt rounds (default: 12) |
 | `SENTRY_DSN` | Optional — enables Sentry error tracking |
+| `SUPABASE_URL` | Supabase project URL (e.g. `https://<ref>.supabase.co`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only, never expose to client) |
 | `SMTP_*` | Email (host, port, email, password, secure) |
 
 ---
