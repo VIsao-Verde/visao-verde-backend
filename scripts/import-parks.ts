@@ -89,8 +89,15 @@ async function main() {
   }> = []
 
   for (const feature of features) {
-    const name = feature.properties.nome?.trim()
-    if (!name) continue
+    const rawNome = feature.properties.nome?.trim() ?? ''
+    const tipo = feature.properties.tipo?.trim() || null
+    const observacao = feature.properties.observacao?.trim() || null
+
+    if (!rawNome) continue
+
+    // When nome starts with lowercase it is a suffix (e.g. "de Marapendi"),
+    // so prepend tipo to form the full name ("Parque Municipal Ecológico de Marapendi").
+    const name = /^[a-z]/.test(rawNome) && tipo ? `${tipo} ${rawNome}` : rawNome
 
     const key = name.toLowerCase()
     if (seenNames.has(key)) continue
@@ -101,8 +108,9 @@ async function main() {
 
     const [longitude, latitude] = centroid
 
-    const description =
-      [feature.properties.tipo, feature.properties.observacao].filter(Boolean).join(' — ') || null
+    // tipo goes into description only when nome is already a standalone name.
+    const isSuffix = /^[a-z]/.test(rawNome)
+    const description = [isSuffix ? null : tipo, observacao].filter(Boolean).join(' — ') || null
 
     parks.push({ name, description, city: 'Rio de Janeiro', latitude, longitude })
   }
