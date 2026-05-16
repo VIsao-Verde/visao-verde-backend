@@ -34,6 +34,7 @@
     "nodemailer": "8.0.5",
     "pg": "8.20.0",
     "pino": "10.3.1",
+    "sharp": "0.34.5",
     "uuid": "13.0.0",
     "zod": "4.3.6"
   },
@@ -43,6 +44,7 @@
       "@sentry-internal/node-cpu-profiler",
       "esbuild",
       "prisma",
+      "sharp",
       "unrs-resolver"
     ]
   },

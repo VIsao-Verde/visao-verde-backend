@@ -25,12 +25,7 @@ export async function addParkImage(request: FastifyRequest, reply: FastifyReply)
 
   const addParkImageUseCase = makeAddParkImageUseCase()
 
-  const { image } = await addParkImageUseCase.execute({
-    parkId,
-    buffer,
-    mimetype: file.mimetype,
-    filename: file.filename,
-  })
+  const { image } = await addParkImageUseCase.execute({ parkId, buffer })
 
   logger.info({ parkId, imageId: image.id }, 'Park image added successfully!')
 
