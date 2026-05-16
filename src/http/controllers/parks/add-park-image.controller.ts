@@ -4,7 +4,7 @@ import { makeAddParkImageUseCase } from '@use-cases/factories/make-add-park-imag
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { idSchema } from '@/http/schemas/utils/public-id-schema.js'
 
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
 export async function addParkImage(request: FastifyRequest, reply: FastifyReply) {
