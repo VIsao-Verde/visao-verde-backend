@@ -3,6 +3,36 @@ import type { ParkRepository, ParkWithDistance, ParkWithRelations } from '@repos
 import type { Prisma } from '@/@types/prisma/client.js'
 
 export class PrismaParksRepository implements ParkRepository {
+  private async getReviewStats(parkIds: string[]): Promise<Map<string, { count: number; avg: number | null }>> {
+    if (parkIds.length === 0) return new Map()
+
+    const rows = await prisma.$queryRaw<Array<{ park_id: string; count: bigint; avg: number | null }>>`
+      SELECT
+        park_id,
+        COUNT(*) AS count,
+        AVG(CASE rating
+          WHEN 'one' THEN 1
+          WHEN 'two' THEN 2
+          WHEN 'three' THEN 3
+          WHEN 'four' THEN 4
+          WHEN 'five' THEN 5
+        END) AS avg
+      FROM reviews
+      WHERE park_id = ANY(${parkIds}::text[])
+      GROUP BY park_id
+    `
+
+    return new Map(
+      rows.map((r) => [
+        r.park_id,
+        {
+          count: Number(r.count),
+          avg: r.avg !== null ? Math.round(Number(r.avg) * 10) / 10 : null,
+        },
+      ]),
+    )
+  }
+
   async create(data: Prisma.ParkCreateInput) {
     return await prisma.park.create({ data })
   }
@@ -66,7 +96,10 @@ export class PrismaParksRepository implements ParkRepository {
     if (rows.length === 0) return []
 
     const parkIds = rows.map((r) => r.id)
-    const images = await prisma.image.findMany({ where: { parkId: { in: parkIds } } })
+    const [images, stats] = await Promise.all([
+      prisma.image.findMany({ where: { parkId: { in: parkIds } } }),
+      this.getReviewStats(parkIds),
+    ])
     const imagesByPark = new Map<string, typeof images>()
     for (const img of images) {
       const list = imagesByPark.get(img.parkId) ?? []
@@ -74,18 +107,23 @@ export class PrismaParksRepository implements ParkRepository {
       imagesByPark.set(img.parkId, list)
     }
 
-    return rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      city: row.city,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      images: imagesByPark.get(row.id) ?? [],
-      distanceKm: Math.round((row.distance_m / 1000) * 100) / 100,
-    }))
+    return rows.map((row) => {
+      const stat = stats.get(row.id)
+      return {
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        city: row.city,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        images: imagesByPark.get(row.id) ?? [],
+        distanceKm: Math.round((row.distance_m / 1000) * 100) / 100,
+        reviewsCount: stat?.count ?? 0,
+        averageRating: stat?.avg ?? null,
+      }
+    })
   }
 
   async list(page: number, limit: number) {
@@ -99,7 +137,19 @@ export class PrismaParksRepository implements ParkRepository {
       }),
       prisma.park.count(),
     ])
-    return { parks, total }
+
+    const stats = await this.getReviewStats(parks.map((p) => p.id))
+
+    const parksWithStats = parks.map((p) => {
+      const stat = stats.get(p.id)
+      return {
+        ...p,
+        reviewsCount: stat?.count ?? 0,
+        averageRating: stat?.avg ?? null,
+      }
+    })
+
+    return { parks: parksWithStats, total }
   }
 
   async update(id: string, data: Prisma.ParkUpdateInput) {

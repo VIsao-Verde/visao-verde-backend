@@ -27,7 +27,11 @@ type HTTPImage = {
   createdAt: Date
 }
 
-type HTTPParkWithImages = HTTPPark & { images: HTTPImage[] }
+type HTTPParkWithImages = HTTPPark & {
+  images: HTTPImage[]
+  reviewsCount: number
+  averageRating: number | null
+}
 
 type HTTPParkWithRelations = HTTPPark & {
   trails: {
@@ -48,6 +52,7 @@ type HTTPParkWithRelations = HTTPPark & {
     user: { id: string; name: string }
   }[]
   averageRating: number | null
+  reviewsCount: number
 }
 
 type HTTPParkWithDistance = HTTPParkWithImages & { distanceKm: number }
@@ -83,6 +88,8 @@ export class ParkPresenter {
       createdAt: park.createdAt,
       updatedAt: park.updatedAt,
       images: park.images.map((img) => ({ id: img.id, url: img.url, createdAt: img.createdAt })),
+      reviewsCount: park.reviewsCount,
+      averageRating: park.averageRating,
     }))
   }
 
@@ -120,6 +127,7 @@ export class ParkPresenter {
         user: { id: r.user.id, name: r.user.name },
       })),
       averageRating: avg,
+      reviewsCount: park.reviews.length,
     }
   }
 
@@ -143,6 +151,8 @@ export class ParkPresenter {
       updatedAt: input.updatedAt,
       images: input.images.map((img) => ({ id: img.id, url: img.url, createdAt: img.createdAt })),
       distanceKm: input.distanceKm,
+      reviewsCount: input.reviewsCount,
+      averageRating: input.averageRating,
     }
   }
 }
