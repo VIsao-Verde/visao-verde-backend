@@ -1,4 +1,4 @@
-import type { ParkWithDistance, ParkWithRelations } from '@repositories/parks-repository.js'
+import type { ParkWithDistance, ParkWithImages, ParkWithRelations } from '@repositories/parks-repository.js'
 import type { Park } from '@/@types/prisma/client.js'
 import type { Rating } from '@/@types/prisma/enums.js'
 
@@ -21,6 +21,14 @@ type HTTPPark = {
   updatedAt: Date
 }
 
+type HTTPImage = {
+  id: string
+  url: string
+  createdAt: Date
+}
+
+type HTTPParkWithImages = HTTPPark & { images: HTTPImage[] }
+
 type HTTPParkWithRelations = HTTPPark & {
   trails: {
     id: string
@@ -31,11 +39,7 @@ type HTTPParkWithRelations = HTTPPark & {
     difficulty: string
     createdAt: Date
   }[]
-  images: {
-    id: string
-    url: string
-    createdAt: Date
-  }[]
+  images: HTTPImage[]
   reviews: {
     id: string
     rating: number
@@ -46,9 +50,7 @@ type HTTPParkWithRelations = HTTPPark & {
   averageRating: number | null
 }
 
-type HTTPParkWithDistance = HTTPPark & {
-  distanceKm: number
-}
+type HTTPParkWithDistance = HTTPParkWithImages & { distanceKm: number }
 
 export class ParkPresenter {
   static toHTTP(park: Park): HTTPPark
@@ -68,6 +70,20 @@ export class ParkPresenter {
       createdAt: input.createdAt,
       updatedAt: input.updatedAt,
     }
+  }
+
+  static toHTTPWithImages(parks: ParkWithImages[]): HTTPParkWithImages[] {
+    return parks.map((park) => ({
+      id: park.id,
+      name: park.name,
+      description: park.description,
+      city: park.city,
+      latitude: park.latitude,
+      longitude: park.longitude,
+      createdAt: park.createdAt,
+      updatedAt: park.updatedAt,
+      images: park.images.map((img) => ({ id: img.id, url: img.url, createdAt: img.createdAt })),
+    }))
   }
 
   static toHTTPWithRelations(park: ParkWithRelations): HTTPParkWithRelations {
@@ -95,11 +111,7 @@ export class ParkPresenter {
         difficulty: t.difficulty,
         createdAt: t.createdAt,
       })),
-      images: park.images.map((img) => ({
-        id: img.id,
-        url: img.url,
-        createdAt: img.createdAt,
-      })),
+      images: park.images.map((img) => ({ id: img.id, url: img.url, createdAt: img.createdAt })),
       reviews: park.reviews.map((r) => ({
         id: r.id,
         rating: ratingToNumber[r.rating],
@@ -129,6 +141,7 @@ export class ParkPresenter {
       longitude: input.longitude,
       createdAt: input.createdAt,
       updatedAt: input.updatedAt,
+      images: input.images.map((img) => ({ id: img.id, url: img.url, createdAt: img.createdAt })),
       distanceKm: input.distanceKm,
     }
   }

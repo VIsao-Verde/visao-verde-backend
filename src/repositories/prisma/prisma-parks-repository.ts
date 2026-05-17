@@ -24,7 +24,7 @@ export class PrismaParksRepository implements ParkRepository {
     })
   }
 
-  async findNearby(lat: number, lon: number, radiusKm: number): Promise<ParkWithDistance[]> {
+  async findNearby(lat: number, lon: number, radiusKm: number, limit: number): Promise<ParkWithDistance[]> {
     const radiusMeters = radiusKm * 1000
 
     const rows = await prisma.$queryRaw<
@@ -60,7 +60,19 @@ export class PrismaParksRepository implements ParkRepository {
         ${radiusMeters}
       )
       ORDER BY distance_m ASC
+      LIMIT ${limit}
     `
+
+    if (rows.length === 0) return []
+
+    const parkIds = rows.map((r) => r.id)
+    const images = await prisma.image.findMany({ where: { parkId: { in: parkIds } } })
+    const imagesByPark = new Map<string, typeof images>()
+    for (const img of images) {
+      const list = imagesByPark.get(img.parkId) ?? []
+      list.push(img)
+      imagesByPark.set(img.parkId, list)
+    }
 
     return rows.map((row) => ({
       id: row.id,
@@ -71,12 +83,23 @@ export class PrismaParksRepository implements ParkRepository {
       longitude: row.longitude,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      images: imagesByPark.get(row.id) ?? [],
       distanceKm: Math.round((row.distance_m / 1000) * 100) / 100,
     }))
   }
 
-  async list() {
-    return await prisma.park.findMany()
+  async list(page: number, limit: number) {
+    const skip = (page - 1) * limit
+    const [parks, total] = await Promise.all([
+      prisma.park.findMany({
+        include: { images: true },
+        orderBy: { name: 'asc' },
+        skip,
+        take: limit,
+      }),
+      prisma.park.count(),
+    ])
+    return { parks, total }
   }
 
   async update(id: string, data: Prisma.ParkUpdateInput) {

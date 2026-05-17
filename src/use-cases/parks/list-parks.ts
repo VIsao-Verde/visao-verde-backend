@@ -1,16 +1,21 @@
-import type { ParkRepository } from '@repositories/parks-repository.js'
-import type { Park } from '@/@types/prisma/client.js'
+import type { ParkRepository, ParkWithImages } from '@repositories/parks-repository.js'
+
+interface ListParksUseCaseRequest {
+  page: number
+  limit: number
+}
 
 type ListParksUseCaseResponse = {
-  parks: Park[]
+  parks: ParkWithImages[]
+  total: number
 }
 
 export class ListParksUseCase {
   constructor(private parksRepository: ParkRepository) {}
 
-  async execute(): Promise<ListParksUseCaseResponse> {
-    const parks = await this.parksRepository.list()
+  async execute({ page, limit }: ListParksUseCaseRequest): Promise<ListParksUseCaseResponse> {
+    const { parks, total } = await this.parksRepository.list(page, limit)
 
-    return { parks }
+    return { parks, total }
   }
 }

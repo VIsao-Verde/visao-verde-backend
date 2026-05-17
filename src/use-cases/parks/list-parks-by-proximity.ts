@@ -4,6 +4,7 @@ interface ListParksByProximityUseCaseRequest {
   latitude: number
   longitude: number
   radiusKm: number
+  limit: number
 }
 
 type ListParksByProximityUseCaseResponse = {
@@ -17,8 +18,9 @@ export class ListParksByProximityUseCase {
     latitude,
     longitude,
     radiusKm,
+    limit,
   }: ListParksByProximityUseCaseRequest): Promise<ListParksByProximityUseCaseResponse> {
-    const parks = await this.parksRepository.findNearby(latitude, longitude, radiusKm)
+    const parks = await this.parksRepository.findNearby(latitude, longitude, radiusKm, limit)
 
     return { parks }
   }
