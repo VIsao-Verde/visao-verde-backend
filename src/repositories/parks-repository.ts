@@ -10,7 +10,10 @@ export type ParkWithRelations = Prisma.ParkGetPayload<{
 
 export type ParkWithImages = Prisma.ParkGetPayload<{
   include: { images: true }
-}>
+}> & {
+  reviewsCount: number
+  averageRating: number | null
+}
 
 export type ParkWithDistance = ParkWithImages & { distanceKm: number }
 
