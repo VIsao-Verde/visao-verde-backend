@@ -5,6 +5,12 @@ export interface ConquestData {
   description?: Prisma.ConquestCreateInput['description']
 }
 
+export type ConquestsWithAchievedAt = Prisma.ConquestGetPayload<{
+  include: {
+    user_conquests: { select: { achievedAt: true } }
+  }
+}>
+
 export interface ConquestRepository {
   create(conquestData: ConquestData): Promise<Conquest>
   findBy(where: Prisma.ConquestWhereUniqueInput): Promise<Conquest | null>

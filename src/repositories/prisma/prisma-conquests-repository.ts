@@ -4,7 +4,6 @@ import type {
   ConquestData,
 } from '@repositories/conquests-repository.js'
 import type { Prisma } from '@/@types/prisma/client.js'
-
 export class PrismaConquestRepository implements ConquestRepository {
   async create(conquestData: ConquestData) {
     return await prisma.conquest.create({
