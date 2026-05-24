@@ -17,7 +17,7 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
     description,
   })
 
-  logger.info('Conquest updated successfully!')
+  logger.info(`Conquest: ${conquest.id} updated successfully!`)
 
   return reply.status(200).send({ conquest: ConquestPresenter.toHTTP(conquest) })
 }

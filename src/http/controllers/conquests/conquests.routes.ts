@@ -15,7 +15,7 @@ import { deleteConquest } from './delete-conquest.controller.js';
 
 const doc = (s: z.ZodType) => z.toJSONSchema(s, { unrepresentable: 'any' })
 
-export async function conquestRouts(app: FastifyInstance) {
+export async function conquestRoutes(app: FastifyInstance) {
   app.post(
     '/add',
     {

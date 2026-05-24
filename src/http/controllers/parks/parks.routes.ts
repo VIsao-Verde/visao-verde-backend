@@ -19,7 +19,7 @@ import { update } from './update-park.controller.js'
 
 const doc = (s: z.ZodType) => z.toJSONSchema(s, { unrepresentable: 'any' })
 
-export async function parkRouts(app: FastifyInstance) {
+export async function parkRoutes(app: FastifyInstance) {
   app.post(
     '/add',
     {
