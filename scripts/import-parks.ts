@@ -1,7 +1,6 @@
 import { prisma } from '@lib/prisma/index.js'
 
-const BASE_URL =
-  'https://pgeo3.rio.rj.gov.br/arcgis/rest/services/Urbanismo/LBB_Areas_Protegidas/FeatureServer/0/query'
+const BASE_URL = 'https://pgeo3.rio.rj.gov.br/arcgis/rest/services/Urbanismo/LBB_Areas_Protegidas/FeatureServer/0/query'
 const PAGE_SIZE = 100
 
 type PolygonCoords = number[][][]
@@ -127,4 +126,3 @@ main()
     process.exit(1)
   })
   .finally(() => prisma.$disconnect())
-

@@ -1,4 +1,4 @@
-import { ResourceNotFoundError } from '@use-cases/errors/resource-not-found-error.js'
+import { ParkNotFoundError } from '@use-cases/errors/park-not-found-error.js'
 import type { Park } from '@/@types/prisma/client.js'
 import type { ParkRepository } from '@/repositories/parks-repository.js'
 
@@ -21,7 +21,7 @@ export class UpdateParkUseCase {
   async execute({ id, ...data }: UpdateParkUseCaseRequest): Promise<UpdateParkUseCaseResponse> {
     const parkExists = await this.parksRepository.findBy({ id })
 
-    if (!parkExists) throw new ResourceNotFoundError()
+    if (!parkExists) throw new ParkNotFoundError()
 
     const park = await this.parksRepository.update(id, data)
 

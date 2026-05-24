@@ -2,6 +2,8 @@ export const messages = {
   validation: {
     invalidData: 'Dados de registro inválidos!',
     userAlreadyExists: 'Já existe um usuário cadastrado com este CPF ou E-mail',
+    conquestAlreadyExists: 'Já existe uma conquista cadastrada com este nome.',
+    conquestNotFound: 'Conquista não encontrada.',
     invalidCpf: 'CPF inválido!',
     invalidJson: 'O corpo da requisição não está em formato JSON válido. Verifique a estrutura dos dados enviados.',
     parkAlreadyExists: 'Já existe um parque cadastrado com este nome e cidade.',

@@ -14,11 +14,7 @@ type ListReviewsByUserUseCaseResponse = {
 export class ListReviewsByUserUseCase {
   constructor(private reviewsRepository: ReviewRepository) {}
 
-  async execute({
-    userId,
-    page,
-    limit,
-  }: ListReviewsByUserUseCaseRequest): Promise<ListReviewsByUserUseCaseResponse> {
+  async execute({ userId, page, limit }: ListReviewsByUserUseCaseRequest): Promise<ListReviewsByUserUseCaseResponse> {
     return await this.reviewsRepository.listByUser(userId, page, limit)
   }
 }

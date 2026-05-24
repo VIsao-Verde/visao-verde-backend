@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client"
-  output = "../src/@types/prisma"
+  output   = "../src/@types/prisma"
 }
 
 datasource db {
@@ -60,6 +60,7 @@ model User {
 
   authenticationAudits AuthenticationAudit[]
   reviews              Review[]
+  coquests             UserConquest[]
 
   @@index([name], name: "idx_user_name")
   @@index([token], name: "idx_user_token")
@@ -145,6 +146,27 @@ model Park {
   reviews Review[]
 
   @@index([latitude, longitude])
-
   @@map("parks")
+}
+
+model Conquest {
+  id          String  @id @default(uuid(7))
+  name        String
+  description String?
+
+  user UserConquest[]
+
+  @@map("conquests")
+}
+
+model UserConquest {
+  userId      String
+  conquestId  String
+  achievedAt  DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conquest  Conquest  @relation(fields: [conquestId], references: [id], onDelete: Cascade)
+
+  @@id([userId, conquestId])
+  @@map("user_conquests")
 }

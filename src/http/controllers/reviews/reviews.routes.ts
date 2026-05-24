@@ -49,7 +49,7 @@ export async function reviewsRoutes(app: FastifyInstance) {
       onRequest: [verifyJwt],
       schema: {
         tags: ['Reviews'],
-        summary: "List own reviews",
+        summary: 'List own reviews',
         security: [{ bearerAuth: [] }],
         querystring: doc(listReviewsSchema),
       },

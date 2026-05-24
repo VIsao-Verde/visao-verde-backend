@@ -1,4 +1,4 @@
-import { ResourceNotFoundError } from '@use-cases/errors/resource-not-found-error.js'
+import { ParkNotFoundError } from '@use-cases/errors/park-not-found-error.js'
 import type { ParkRepository } from '@/repositories/parks-repository.js'
 
 interface DeleteParkUseCaseRequest {
@@ -11,7 +11,7 @@ export class DeleteParkUseCase {
   async execute({ id }: DeleteParkUseCaseRequest): Promise<void> {
     const parkExists = await this.parksRepository.findBy({ id })
 
-    if (!parkExists) throw new ResourceNotFoundError()
+    if (!parkExists) throw new ParkNotFoundError()
 
     await this.parksRepository.delete(id)
   }

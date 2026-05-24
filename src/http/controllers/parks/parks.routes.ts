@@ -19,7 +19,7 @@ import { update } from './update-park.controller.js'
 
 const doc = (s: z.ZodType) => z.toJSONSchema(s, { unrepresentable: 'any' })
 
-export async function parkRouts(app: FastifyInstance) {
+export async function parkRoutes(app: FastifyInstance) {
   app.post(
     '/add',
     {
@@ -116,7 +116,8 @@ export async function parkRouts(app: FastifyInstance) {
       schema: {
         tags: ['Parks'],
         summary: 'Upload an image for a park',
-        description: 'Requires ADMIN role. Accepts multipart/form-data with a single image file (max 5MB, jpeg/png/webp).',
+        description:
+          'Requires ADMIN role. Accepts multipart/form-data with a single image file (max 5MB, jpeg/png/webp).',
         security: [{ bearerAuth: [] }],
         params: doc(idSchema),
         consumes: ['multipart/form-data'],
