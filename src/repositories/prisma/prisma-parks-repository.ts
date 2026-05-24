@@ -99,16 +99,16 @@ export class PrismaParksRepository implements ParkRepository {
           location,
           ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography
         ) AS distance_m,
-        EXISTS(SELECT 1 FROM user_favorite_parks WHERE user_id = ${userId} AND park_id = parks.id) AS is_favorited,
-        EXISTS(SELECT 1 FROM user_visited_parks WHERE user_id = ${userId} AND park_id = parks.id) AS is_visited
+        EXISTS(SELECT 1 FROM user_favorite_parks WHERE "userId" = ${userId} AND "parkId" = parks.id) AS is_favorited,
+        EXISTS(SELECT 1 FROM user_visited_parks WHERE "userId" = ${userId} AND "parkId" = parks.id) AS is_visited
       FROM parks
       WHERE ST_DWithin(
         location,
         ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography,
         ${radiusMeters}
       )
-      AND (${skipFavFilter} OR EXISTS(SELECT 1 FROM user_favorite_parks WHERE user_id = ${userId} AND park_id = parks.id))
-      AND (${skipVisFilter} OR EXISTS(SELECT 1 FROM user_visited_parks WHERE user_id = ${userId} AND park_id = parks.id))
+      AND (${skipFavFilter} OR EXISTS(SELECT 1 FROM user_favorite_parks WHERE "userId" = ${userId} AND "parkId" = parks.id))
+      AND (${skipVisFilter} OR EXISTS(SELECT 1 FROM user_visited_parks WHERE "userId" = ${userId} AND "parkId" = parks.id))
       ORDER BY distance_m ASC
       LIMIT ${limit}
     `
