@@ -127,7 +127,10 @@ async function fetchAllParks(): Promise<OsmElement[]> {
     console.log(`  Trying mirror: ${mirror}`)
     const res = await fetch(mirror, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'visao-verde-import/1.0',
+      },
       body: `data=${encodeURIComponent(query)}`,
     })
 
