@@ -1,6 +1,6 @@
 import type { ConquestRepository } from '@repositories/conquests-repository.js'
 import { ConquestAlreadyExistsError } from '@use-cases/errors/conquest-already-exists-error.js'
-import { Prisma, type Conquest } from '@/@types/prisma/client.js'
+import { type Conquest, Prisma } from '@/@types/prisma/client.js'
 
 interface CreateConquestUseCaseRequest {
   name: string
@@ -14,12 +14,8 @@ type CreateConquestUseCaseResponse = {
 export class CreateConquestUseCase {
   constructor(private conquestsRepository: ConquestRepository) {}
 
-  async execute({
-    name,
-    description,
-  }: CreateConquestUseCaseRequest): Promise<CreateConquestUseCaseResponse> {
+  async execute({ name, description }: CreateConquestUseCaseRequest): Promise<CreateConquestUseCaseResponse> {
     try {
-
       const conquest = await this.conquestsRepository.create({
         name,
         description,

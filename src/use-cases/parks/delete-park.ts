@@ -1,5 +1,5 @@
-import type { ParkRepository } from '@/repositories/parks-repository.js'
 import { ParkNotFoundError } from '@use-cases/errors/park-not-found-error.js'
+import type { ParkRepository } from '@/repositories/parks-repository.js'
 
 interface DeleteParkUseCaseRequest {
   id: string

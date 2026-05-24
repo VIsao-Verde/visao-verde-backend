@@ -1,10 +1,5 @@
 import { prisma } from '@lib/prisma/index.js'
-import type {
-  ReviewData,
-  ReviewRepository,
-  ReviewWithPark,
-  ReviewWithUser,
-} from '@repositories/reviews-repository.js'
+import type { ReviewData, ReviewRepository, ReviewWithPark, ReviewWithUser } from '@repositories/reviews-repository.js'
 import type { Prisma } from '@/@types/prisma/client.js'
 
 export class PrismaReviewRepository implements ReviewRepository {
@@ -22,11 +17,7 @@ export class PrismaReviewRepository implements ReviewRepository {
     return await prisma.review.findUnique({ where })
   }
 
-  async listByPark(
-    parkId: string,
-    page: number,
-    limit: number,
-  ): Promise<{ reviews: ReviewWithUser[]; total: number }> {
+  async listByPark(parkId: string, page: number, limit: number): Promise<{ reviews: ReviewWithUser[]; total: number }> {
     const [reviews, total] = await Promise.all([
       prisma.review.findMany({
         where: { parkId },
@@ -41,11 +32,7 @@ export class PrismaReviewRepository implements ReviewRepository {
     return { reviews, total }
   }
 
-  async listByUser(
-    userId: string,
-    page: number,
-    limit: number,
-  ): Promise<{ reviews: ReviewWithPark[]; total: number }> {
+  async listByUser(userId: string, page: number, limit: number): Promise<{ reviews: ReviewWithPark[]; total: number }> {
     const [reviews, total] = await Promise.all([
       prisma.review.findMany({
         where: { userId },

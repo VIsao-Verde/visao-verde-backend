@@ -1,8 +1,8 @@
 import { logger } from '@lib/logger/index.js'
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { ConquestPresenter } from '@/http/presenters/conquest-presenter.js'
 import { idSchema } from '@/http/schemas/utils/public-id-schema.js'
 import { makeFindConquestUseCase } from '@/use-cases/factories/make-find-conquest-use-case.js'
-import { ConquestPresenter } from '@/http/presenters/conquest-presenter.js'
 
 export async function find(request: FastifyRequest, reply: FastifyReply) {
   const { id } = idSchema.parse(request.params)

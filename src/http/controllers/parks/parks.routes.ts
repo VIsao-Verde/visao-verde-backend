@@ -116,7 +116,8 @@ export async function parkRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Parks'],
         summary: 'Upload an image for a park',
-        description: 'Requires ADMIN role. Accepts multipart/form-data with a single image file (max 5MB, jpeg/png/webp).',
+        description:
+          'Requires ADMIN role. Accepts multipart/form-data with a single image file (max 5MB, jpeg/png/webp).',
         security: [{ bearerAuth: [] }],
         params: doc(idSchema),
         consumes: ['multipart/form-data'],

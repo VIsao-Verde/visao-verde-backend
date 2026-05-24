@@ -12,10 +12,14 @@ type ListConquestsByUserIdUseCaseResponse = {
 }
 
 export class ListConquestsByUserIdUseCase {
-    constructor(private conquestsRepository: ConquestRepository) {}
+  constructor(private conquestsRepository: ConquestRepository) {}
 
-    async execute({ userId, page, limit} : ListConquestsByUserIdUseCaseRequest): Promise<ListConquestsByUserIdUseCaseResponse> {
-        const {conquests, total} = await this.conquestsRepository.listByUserId(userId, page, limit)
-        return { conquests, total }
-    }
+  async execute({
+    userId,
+    page,
+    limit,
+  }: ListConquestsByUserIdUseCaseRequest): Promise<ListConquestsByUserIdUseCaseResponse> {
+    const { conquests, total } = await this.conquestsRepository.listByUserId(userId, page, limit)
+    return { conquests, total }
+  }
 }

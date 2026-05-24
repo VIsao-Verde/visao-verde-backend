@@ -1,8 +1,5 @@
 import { prisma } from '@lib/prisma/index.js'
-import type {
-  ConquestRepository,
-  ConquestData,
-} from '@repositories/conquests-repository.js'
+import type { ConquestData, ConquestRepository } from '@repositories/conquests-repository.js'
 import type { Prisma } from '@/@types/prisma/client.js'
 export class PrismaConquestRepository implements ConquestRepository {
   async create(conquestData: ConquestData) {
@@ -52,9 +49,9 @@ export class PrismaConquestRepository implements ConquestRepository {
       }),
     ])
 
-    const conquests = userConquests.map(
-      (userConquest) => {userConquest.conquest, userConquest.achievedAt},
-    )
+    const conquests = userConquests.map((userConquest) => {
+      userConquest.conquest, userConquest.achievedAt
+    })
 
     return {
       conquests,

@@ -20,7 +20,7 @@ export async function update(request: FastifyRequest, reply: FastifyReply) {
     longitude,
   })
 
-  logger.info('Park updated successfully!')
+  logger.info(`Park: ${park.id} updated successfully!`)
 
   return reply.status(200).send({ park: ParkPresenter.toHTTP(park) })
 }

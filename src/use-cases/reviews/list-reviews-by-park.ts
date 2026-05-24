@@ -19,11 +19,7 @@ export class ListReviewsByParkUseCase {
     private parksRepository: ParkRepository,
   ) {}
 
-  async execute({
-    parkId,
-    page,
-    limit,
-  }: ListReviewsByParkUseCaseRequest): Promise<ListReviewsByParkUseCaseResponse> {
+  async execute({ parkId, page, limit }: ListReviewsByParkUseCaseRequest): Promise<ListReviewsByParkUseCaseResponse> {
     const park = await this.parksRepository.findBy({ id: parkId })
 
     if (!park) throw new ParkNotFoundError()

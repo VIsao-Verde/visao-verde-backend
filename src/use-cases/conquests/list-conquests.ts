@@ -1,5 +1,5 @@
-import type { Conquest } from '@/@types/prisma/client.js'
 import type { ConquestRepository } from '@repositories/conquests-repository.js'
+import type { Conquest } from '@/@types/prisma/client.js'
 
 interface ListConquestsUseCaseRequest {
   page: number
@@ -12,10 +12,10 @@ type ListConquestsUseCaseResponse = {
 }
 
 export class ListConquestsUseCase {
-    constructor(private conquestsRepository: ConquestRepository) {}
+  constructor(private conquestsRepository: ConquestRepository) {}
 
-    async execute({ page, limit} : ListConquestsUseCaseRequest): Promise<ListConquestsUseCaseResponse> {
-        const {conquests, total} = await this.conquestsRepository.list(page, limit)
-        return { conquests, total }
-    }
+  async execute({ page, limit }: ListConquestsUseCaseRequest): Promise<ListConquestsUseCaseResponse> {
+    const { conquests, total } = await this.conquestsRepository.list(page, limit)
+    return { conquests, total }
+  }
 }

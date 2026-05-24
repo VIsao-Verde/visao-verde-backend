@@ -1,17 +1,17 @@
+import type { FastifyInstance } from 'fastify'
+import z from 'zod'
 import { UserRole } from '@/@types/prisma/enums.js'
-import { verifyJwt } from "@/http/middlewares/verify-jwt.middleware.js";
-import { verifyUserRole } from "@/http/middlewares/verify-user-role.middleware.js";
-import { createConquestSchema } from '@/http/schemas/conquests/create-conquest-schema.js';
-import { FastifyInstance } from "fastify";
-import { create } from './create-conquest.controller.js';
-import z from 'zod';
-import { idSchema } from '@/http/schemas/utils/public-id-schema.js';
-import { find } from './find-conquest-controller.js';
-import { list } from './list-conquests.controller.js';
-import { listByUser } from './list-conquests-by-user-id.controller.js';
-import { update } from './update-conquest.js';
-import { updateSchema } from '@/http/schemas/conquests/update-schema.js';
-import { deleteConquest } from './delete-conquest.controller.js';
+import { verifyJwt } from '@/http/middlewares/verify-jwt.middleware.js'
+import { verifyUserRole } from '@/http/middlewares/verify-user-role.middleware.js'
+import { createConquestSchema } from '@/http/schemas/conquests/create-conquest-schema.js'
+import { updateSchema } from '@/http/schemas/conquests/update-schema.js'
+import { idSchema } from '@/http/schemas/utils/public-id-schema.js'
+import { create } from './create-conquest.controller.js'
+import { deleteConquest } from './delete-conquest.controller.js'
+import { find } from './find-conquest-controller.js'
+import { list } from './list-conquests.controller.js'
+import { listByUser } from './list-conquests-by-user-id.controller.js'
+import { update } from './update-conquest.js'
 
 const doc = (s: z.ZodType) => z.toJSONSchema(s, { unrepresentable: 'any' })
 
@@ -102,5 +102,4 @@ export async function conquestRoutes(app: FastifyInstance) {
     },
     deleteConquest,
   )
-
 }

@@ -1,5 +1,5 @@
-import { ConquestRepository } from '@/repositories/conquests-repository.js'
 import { ConquestNotFoundError } from '@use-cases/errors/conquest-not-found-error.js'
+import type { ConquestRepository } from '@/repositories/conquests-repository.js'
 
 interface DeleteConquestUseCaseRequest {
   id: string

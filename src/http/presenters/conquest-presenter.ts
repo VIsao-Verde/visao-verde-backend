@@ -1,5 +1,5 @@
 import type { Conquest } from '@/@types/prisma/client.js'
-import { ConquestsWithAchievedAt } from '@/repositories/conquests-repository.js'
+import type { ConquestsWithAchievedAt } from '@/repositories/conquests-repository.js'
 
 type HTTPConquest = {
   id: string

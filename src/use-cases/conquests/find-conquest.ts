@@ -1,6 +1,6 @@
 import type { ConquestRepository } from '@repositories/conquests-repository.js'
-import type { Conquest } from '@/@types/prisma/client.js'
 import { ConquestNotFoundError } from '@use-cases/errors/conquest-not-found-error.js'
+import type { Conquest } from '@/@types/prisma/client.js'
 
 interface FindConquestUseCaseRequest {
   id: string

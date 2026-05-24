@@ -1,4 +1,4 @@
-import type { Prisma, Conquest } from '@/@types/prisma/client.js'
+import type { Conquest, Prisma } from '@/@types/prisma/client.js'
 
 export interface ConquestData {
   name: Prisma.ConquestCreateInput['name']
