@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger/index.js'
 import { makeListParksByProximityUseCase } from '@/use-cases/factories/make-list-parks-by-proximity-use-case.js'
 
 export async function listNearby(request: FastifyRequest, reply: FastifyReply) {
-  const { latitude, longitude, radius, limit } = nearbyParksSchema.parse(request.query)
+  const { latitude, longitude, radius, limit, favorited, visited } = nearbyParksSchema.parse(request.query)
 
   const listParksByProximityUseCase = makeListParksByProximityUseCase()
 
@@ -14,6 +14,8 @@ export async function listNearby(request: FastifyRequest, reply: FastifyReply) {
     longitude,
     radiusKm: radius,
     limit,
+    userId: request.user.sub,
+    filters: { favorited, visited },
   })
 
   logger.info({ latitude, longitude, radius, limit }, 'Nearby parks listed successfully!')

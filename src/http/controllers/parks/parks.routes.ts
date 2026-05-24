@@ -1,6 +1,7 @@
 import { verifyUserRole } from '@middlewares/verify-user-role.middleware.js'
 import { addParkSchema } from '@schemas/parks/add-park-schema.js'
 import { imageParamsSchema } from '@schemas/parks/image-params-schema.js'
+import { listParksSchema } from '@schemas/parks/list-parks-schema.js'
 import { nearbyParksSchema } from '@schemas/parks/nearby-parks-schema.js'
 import { updateSchema } from '@schemas/parks/update-schema.js'
 import { idSchema } from '@schemas/utils/public-id-schema.js'
@@ -42,7 +43,10 @@ export async function parkRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Parks'],
         summary: 'List all parks',
+        description:
+          'Returns parks with review stats, isFavorited, and isVisited for the authenticated user. Use ?favorited=true and/or ?visited=true to filter.',
         security: [{ bearerAuth: [] }],
+        querystring: doc(listParksSchema),
       },
     },
     list,
@@ -55,7 +59,8 @@ export async function parkRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Parks'],
         summary: 'Find parks by proximity',
-        description: 'Returns parks within the given radius (km) of the coordinates.',
+        description:
+          'Returns parks within the given radius (km) of the coordinates with isFavorited and isVisited. Use ?favorited=true and/or ?visited=true to filter.',
         security: [{ bearerAuth: [] }],
         querystring: doc(nearbyParksSchema),
       },

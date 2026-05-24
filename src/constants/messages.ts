@@ -22,6 +22,10 @@ export const messages = {
     passwordDigit: 'A senha deve conter pelo menos um número.',
     passwordSpecial: 'A senha deve conter pelo menos um caractere especial.',
     passwordNoSpaces: 'A senha não pode conter espaços.',
+    parkAlreadyFavorited: 'Este parque já está nos seus favoritos.',
+    parkNotFavorited: 'Este parque não está nos seus favoritos.',
+    parkAlreadyVisited: 'Você já visitou este parque.',
+    parkNotVisited: 'Você ainda não visitou este parque.',
   },
   errors: {
     internalServer: 'Erro interno do servidor!',
