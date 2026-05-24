@@ -49,9 +49,10 @@ export class PrismaConquestRepository implements ConquestRepository {
       }),
     ])
 
-    const conquests = userConquests.map((userConquest) => {
-      userConquest.conquest, userConquest.achievedAt
-    })
+    const conquests = userConquests.map((userConquest) => ({
+      ...userConquest.conquest,
+      user_conquests: [{ achievedAt: userConquest.achievedAt }],
+    }))
 
     return {
       conquests,

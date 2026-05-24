@@ -1,5 +1,10 @@
 import { prisma } from '@lib/prisma/index.js'
-import type { ParkRepository, ParkWithDistance, ParkWithRelations } from '@repositories/parks-repository.js'
+import type {
+  ParkFilters,
+  ParkRepository,
+  ParkWithDistance,
+  ParkWithRelations,
+} from '@repositories/parks-repository.js'
 import type { Prisma } from '@/@types/prisma/client.js'
 
 export class PrismaParksRepository implements ParkRepository {
@@ -54,8 +59,17 @@ export class PrismaParksRepository implements ParkRepository {
     })
   }
 
-  async findNearby(lat: number, lon: number, radiusKm: number, limit: number): Promise<ParkWithDistance[]> {
+  async findNearby(
+    lat: number,
+    lon: number,
+    radiusKm: number,
+    limit: number,
+    userId: string,
+    filters?: ParkFilters,
+  ): Promise<ParkWithDistance[]> {
     const radiusMeters = radiusKm * 1000
+    const skipFavFilter = !filters?.favorited
+    const skipVisFilter = !filters?.visited
 
     const rows = await prisma.$queryRaw<
       Array<{
@@ -68,6 +82,8 @@ export class PrismaParksRepository implements ParkRepository {
         created_at: Date
         updated_at: Date
         distance_m: number
+        is_favorited: boolean
+        is_visited: boolean
       }>
     >`
       SELECT
@@ -82,13 +98,17 @@ export class PrismaParksRepository implements ParkRepository {
         ST_Distance(
           location,
           ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography
-        ) AS distance_m
+        ) AS distance_m,
+        EXISTS(SELECT 1 FROM user_favorite_parks WHERE user_id = ${userId} AND park_id = parks.id) AS is_favorited,
+        EXISTS(SELECT 1 FROM user_visited_parks WHERE user_id = ${userId} AND park_id = parks.id) AS is_visited
       FROM parks
       WHERE ST_DWithin(
         location,
         ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography,
         ${radiusMeters}
       )
+      AND (${skipFavFilter} OR EXISTS(SELECT 1 FROM user_favorite_parks WHERE user_id = ${userId} AND park_id = parks.id))
+      AND (${skipVisFilter} OR EXISTS(SELECT 1 FROM user_visited_parks WHERE user_id = ${userId} AND park_id = parks.id))
       ORDER BY distance_m ASC
       LIMIT ${limit}
     `
@@ -122,23 +142,39 @@ export class PrismaParksRepository implements ParkRepository {
         distanceKm: Math.round((row.distance_m / 1000) * 100) / 100,
         reviewsCount: stat?.count ?? 0,
         averageRating: stat?.avg ?? null,
+        isFavorited: row.is_favorited,
+        isVisited: row.is_visited,
       }
     })
   }
 
-  async list(page: number, limit: number) {
+  async list(page: number, limit: number, userId: string, filters?: ParkFilters) {
     const skip = (page - 1) * limit
+    const whereClause: Prisma.ParkWhereInput = {
+      ...(filters?.favorited ? { favorites: { some: { userId } } } : {}),
+      ...(filters?.visited ? { visits: { some: { userId } } } : {}),
+    }
+
     const [parks, total] = await Promise.all([
       prisma.park.findMany({
         include: { images: true },
+        where: whereClause,
         orderBy: { name: 'asc' },
         skip,
         take: limit,
       }),
-      prisma.park.count(),
+      prisma.park.count({ where: whereClause }),
     ])
 
-    const stats = await this.getReviewStats(parks.map((p) => p.id))
+    const parkIds = parks.map((p) => p.id)
+    const [stats, userFavorites, userVisits] = await Promise.all([
+      this.getReviewStats(parkIds),
+      prisma.userFavoritePark.findMany({ where: { userId, parkId: { in: parkIds } }, select: { parkId: true } }),
+      prisma.userVisitedPark.findMany({ where: { userId, parkId: { in: parkIds } }, select: { parkId: true } }),
+    ])
+
+    const favoritedIds = new Set(userFavorites.map((f) => f.parkId))
+    const visitedIds = new Set(userVisits.map((v) => v.parkId))
 
     const parksWithStats = parks.map((p) => {
       const stat = stats.get(p.id)
@@ -146,6 +182,8 @@ export class PrismaParksRepository implements ParkRepository {
         ...p,
         reviewsCount: stat?.count ?? 0,
         averageRating: stat?.avg ?? null,
+        isFavorited: favoritedIds.has(p.id),
+        isVisited: visitedIds.has(p.id),
       }
     })
 

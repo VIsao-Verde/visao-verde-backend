@@ -31,6 +31,8 @@ type HTTPParkWithImages = HTTPPark & {
   images: HTTPImage[]
   reviewsCount: number
   averageRating: number | null
+  isFavorited: boolean
+  isVisited: boolean
 }
 
 type HTTPParkWithRelations = HTTPPark & {
@@ -90,6 +92,8 @@ export class ParkPresenter {
       images: park.images.map((img) => ({ id: img.id, url: img.url, createdAt: img.createdAt })),
       reviewsCount: park.reviewsCount,
       averageRating: park.averageRating,
+      isFavorited: park.isFavorited,
+      isVisited: park.isVisited,
     }))
   }
 
@@ -153,6 +157,8 @@ export class ParkPresenter {
       distanceKm: input.distanceKm,
       reviewsCount: input.reviewsCount,
       averageRating: input.averageRating,
+      isFavorited: input.isFavorited,
+      isVisited: input.isVisited,
     }
   }
 }

@@ -13,16 +13,35 @@ export type ParkWithImages = Prisma.ParkGetPayload<{
 }> & {
   reviewsCount: number
   averageRating: number | null
+  isFavorited: boolean
+  isVisited: boolean
 }
 
 export type ParkWithDistance = ParkWithImages & { distanceKm: number }
+
+export type ParkFilters = {
+  favorited?: boolean
+  visited?: boolean
+}
 
 export interface ParkRepository {
   create(data: Prisma.ParkCreateInput): Promise<Park>
   findBy(where: Prisma.ParkWhereUniqueInput): Promise<Park | null>
   findByWithRelations(where: Prisma.ParkWhereUniqueInput): Promise<ParkWithRelations | null>
-  findNearby(lat: number, lon: number, radiusKm: number, limit: number): Promise<ParkWithDistance[]>
-  list(page: number, limit: number): Promise<{ parks: ParkWithImages[]; total: number }>
+  findNearby(
+    lat: number,
+    lon: number,
+    radiusKm: number,
+    limit: number,
+    userId: string,
+    filters?: ParkFilters,
+  ): Promise<ParkWithDistance[]>
+  list(
+    page: number,
+    limit: number,
+    userId: string,
+    filters?: ParkFilters,
+  ): Promise<{ parks: ParkWithImages[]; total: number }>
   update(id: string, data: Prisma.ParkUpdateInput): Promise<Park>
   delete(id: string): Promise<Park>
 

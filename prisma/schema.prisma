@@ -61,6 +61,8 @@ model User {
   authenticationAudits AuthenticationAudit[]
   reviews              Review[]
   coquests             UserConquest[]
+  favorites            UserFavoritePark[]
+  visits               UserVisitedPark[]
 
   @@index([name], name: "idx_user_name")
   @@index([token], name: "idx_user_token")
@@ -141,9 +143,11 @@ model Park {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  images  Image[]
-  trails  Trail[]
-  reviews Review[]
+  images    Image[]
+  trails    Trail[]
+  reviews   Review[]
+  favorites UserFavoritePark[]
+  visits    UserVisitedPark[]
 
   @@index([latitude, longitude])
   @@map("parks")
@@ -169,4 +173,28 @@ model UserConquest {
 
   @@id([userId, conquestId])
   @@map("user_conquests")
+}
+
+model UserFavoritePark {
+  userId      String
+  parkId      String
+  favoritedAt DateTime @default(now()) @map("favorited_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  park Park @relation(fields: [parkId], references: [id], onDelete: Cascade)
+
+  @@id([userId, parkId])
+  @@map("user_favorite_parks")
+}
+
+model UserVisitedPark {
+  userId    String
+  parkId    String
+  visitedAt DateTime @default(now()) @map("visited_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  park Park @relation(fields: [parkId], references: [id], onDelete: Cascade)
+
+  @@id([userId, parkId])
+  @@map("user_visited_parks")
 }
