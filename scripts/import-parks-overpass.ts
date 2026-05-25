@@ -1,5 +1,7 @@
 import { prisma } from '@lib/prisma/index.js'
 
+const RESET = process.argv.includes('--reset')
+
 // ─── Overpass API ─────────────────────────────────────────────────────────────
 
 const OVERPASS_MIRRORS = [
@@ -77,6 +79,26 @@ interface OverpassResponse {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6_371_000
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(a))
+}
+
+function normalizeName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function extractCoords(el: OsmElement): [number, number] | null {
   if (el.type === 'node' && el.lat != null && el.lon != null) {
     return [el.lat, el.lon]
@@ -151,28 +173,37 @@ async function fetchAllParks(): Promise<OsmElement[]> {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (RESET) {
+    console.log('--reset flag detected. Deleting all parks...')
+    const deleted = await prisma.park.deleteMany()
+    console.log(`Deleted ${deleted.count} parks.\n`)
+  }
+
   const elements = await fetchAllParks()
 
-  const seenNames = new Set<string>()
-
-  const parks: Array<{
+  type ParkEntry = {
     name: string
     description: string | null
     city: string
     latitude: number
     longitude: number
-  }> = []
+  }
+
+  // Prefer the park with a description; tiebreak by longer name.
+  function pickBetter(a: ParkEntry, b: ParkEntry): ParkEntry {
+    const aHasDesc = a.description ? 1 : 0
+    const bHasDesc = b.description ? 1 : 0
+    if (aHasDesc !== bHasDesc) return aHasDesc > bHasDesc ? a : b
+    return a.name.length >= b.name.length ? a : b
+  }
+
+  const parks: ParkEntry[] = []
 
   for (const el of elements) {
     const tags = el.tags ?? {}
 
     const name = extractName(tags)
     if (!name) continue
-
-    // Dedup por nome normalizado (remove parques duplicados que aparecem como
-    // node + way + relation simultaneamente no OSM)
-    const key = name.toLowerCase().trim()
-    if (seenNames.has(key)) continue
 
     if (isFalsePositive(name)) {
       console.log(`  Skipping false positive: "${name}"`)
@@ -182,17 +213,49 @@ async function main() {
     const coords = extractCoords(el)
     if (!coords) continue
 
-    seenNames.add(key)
-
     const [latitude, longitude] = coords
-
-    parks.push({
+    const normalizedName = normalizeName(name)
+    const entry: ParkEntry = {
       name,
       description: extractDescription(tags),
       city: extractCity(tags),
       latitude,
       longitude,
-    })
+    }
+
+    // Same name within 500 m → keep better one
+    const sameNameIdx = parks.findIndex(
+      (p) =>
+        normalizeName(p.name) === normalizedName &&
+        haversineMeters(p.latitude, p.longitude, latitude, longitude) <= 500,
+    )
+    if (sameNameIdx !== -1) {
+      const better = pickBetter(parks[sameNameIdx], entry)
+      if (better === entry) {
+        console.log(`  Replacing "${parks[sameNameIdx].name}" with "${name}" (same name, better info)`)
+        parks[sameNameIdx] = entry
+      } else {
+        console.log(`  Skipping duplicate (same name, ≤500 m): "${name}"`)
+      }
+      continue
+    }
+
+    // Different name within 50 m → keep better one
+    const nearbyIdx = parks.findIndex(
+      (p) => haversineMeters(p.latitude, p.longitude, latitude, longitude) <= 50,
+    )
+    if (nearbyIdx !== -1) {
+      const better = pickBetter(parks[nearbyIdx], entry)
+      if (better === entry) {
+        console.log(`  Replacing "${parks[nearbyIdx].name}" with "${name}" (nearby, better info)`)
+        parks[nearbyIdx] = entry
+      } else {
+        console.log(`  Skipping nearby (≤50 m): "${name}" vs "${parks[nearbyIdx].name}"`)
+      }
+      continue
+    }
+
+    parks.push(entry)
   }
 
   console.log(`Unique parks to insert: ${parks.length}`)
