@@ -80,7 +80,7 @@ app.addHook('onResponse', (request, reply, done) => {
 })
 
 app.register(fastifyCors, {
-  origin: env.FRONTEND_URL,
+  origin: [env.FRONTEND_URL, "https://visao-verde.pages.dev/login"],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Authorization'],
