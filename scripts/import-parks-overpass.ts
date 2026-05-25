@@ -151,7 +151,8 @@ async function fetchAllParks(): Promise<OsmElement[]> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'visao-verde-import/1.0',
+        'User-Agent': 'VisaoVerdeBot/1.0',
+        'Accept': 'application/json, */*'
       },
       body: `data=${encodeURIComponent(query)}`,
     })

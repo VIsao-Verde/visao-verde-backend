@@ -151,6 +151,7 @@ export class PrismaParksRepository implements ParkRepository {
   async list(page: number, limit: number, userId: string, filters?: ParkFilters) {
     const skip = (page - 1) * limit
     const whereClause: Prisma.ParkWhereInput = {
+      ...(filters?.name ? { name: { contains: filters.name, mode: 'insensitive' } } : {}),
       ...(filters?.favorited ? { favorites: { some: { userId } } } : {}),
       ...(filters?.visited ? { visits: { some: { userId } } } : {}),
     }

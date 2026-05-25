@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger/index.js'
 import { makeListParksUseCase } from '@/use-cases/factories/make-list-parks-use-case.js'
 
 export async function list(request: FastifyRequest, reply: FastifyReply) {
-  const { page, limit, favorited, visited } = listParksSchema.parse(request.query)
+  const { page, limit, name, favorited, visited } = listParksSchema.parse(request.query)
 
   const listParksUseCase = makeListParksUseCase()
 
@@ -13,7 +13,7 @@ export async function list(request: FastifyRequest, reply: FastifyReply) {
     page,
     limit,
     userId: request.user.sub,
-    filters: { favorited, visited },
+    filters: { name, favorited, visited },
   })
 
   logger.info({ page, limit }, 'Parks listed successfully!')

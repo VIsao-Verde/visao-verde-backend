@@ -20,6 +20,7 @@ export type ParkWithImages = Prisma.ParkGetPayload<{
 export type ParkWithDistance = ParkWithImages & { distanceKm: number }
 
 export type ParkFilters = {
+  name?: string
   favorited?: boolean
   visited?: boolean
 }
