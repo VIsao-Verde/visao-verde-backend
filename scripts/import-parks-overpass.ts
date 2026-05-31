@@ -130,7 +130,12 @@ function extractCategory(name: string, tags: OsmTags): string {
     const pc = tags.protect_class ?? ''
     if (pc === '2') return /nacional/i.test(name) ? 'national_park' : 'park'
     if (pc === '5') return 'park'
-    return 'nature_reserve'
+    if (pc !== '') return 'nature_reserve'
+    // protect_class absent — fall back to name
+    if (/parque\s+nacional/i.test(name)) return 'national_park'
+    if (/parque\s+(estadual|municipal|natural|ecológico)/i.test(name)) return 'park'
+    if (/\b(reserva|estação\s+ecológica|refúgio|monumento\s+natural|rppn)\b/i.test(name)) return 'nature_reserve'
+    return 'park'
   }
   if (tags.leisure === 'nature_reserve') return 'nature_reserve'
   if (tags.leisure === 'garden') return 'garden'
