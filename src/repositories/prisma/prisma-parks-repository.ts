@@ -118,8 +118,8 @@ export class PrismaParksRepository implements ParkRepository {
       )
       AND (${skipFavFilter} OR EXISTS(SELECT 1 FROM user_favorite_parks WHERE "userId" = ${userId} AND "parkId" = parks.id))
       AND (${skipVisFilter} OR EXISTS(SELECT 1 FROM user_visited_parks WHERE "userId" = ${userId} AND "parkId" = parks.id))
-      AND (${skipCategoryFilter} OR category = ${categoryValue}::text)
-      AND (${skipSourceFilter}   OR source   = ${sourceValue}::text)
+      AND (${skipCategoryFilter} OR category::text = ${categoryValue}::text)
+      AND (${skipSourceFilter}   OR source::text   = ${sourceValue}::text)
       ORDER BY distance_m ASC
       LIMIT ${limit}
     `
