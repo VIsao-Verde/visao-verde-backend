@@ -1,4 +1,5 @@
 import type { Image, Park, Prisma, Trail } from '@/@types/prisma/client.js'
+import type { ParkCategory, ParkSource } from '@/@types/prisma/enums.js'
 
 export type ParkWithRelations = Prisma.ParkGetPayload<{
   include: {
@@ -23,6 +24,8 @@ export type ParkFilters = {
   name?: string
   favorited?: boolean
   visited?: boolean
+  category?: ParkCategory
+  source?: ParkSource
 }
 
 export interface ParkRepository {

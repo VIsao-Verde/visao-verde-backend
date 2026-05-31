@@ -6,6 +6,7 @@ import type {
   ParkWithRelations,
 } from '@repositories/parks-repository.js'
 import type { Prisma } from '@/@types/prisma/client.js'
+import type { ParkCategory, ParkSource } from '@/@types/prisma/enums.js'
 
 export class PrismaParksRepository implements ParkRepository {
   private async getReviewStats(parkIds: string[]): Promise<Map<string, { count: number; avg: number | null }>> {
@@ -70,6 +71,10 @@ export class PrismaParksRepository implements ParkRepository {
     const radiusMeters = radiusKm * 1000
     const skipFavFilter = !filters?.favorited
     const skipVisFilter = !filters?.visited
+    const skipCategoryFilter = !filters?.category
+    const skipSourceFilter = !filters?.source
+    const categoryValue = filters?.category ?? 'park'
+    const sourceValue = filters?.source ?? 'manual'
 
     const rows = await prisma.$queryRaw<
       Array<{
@@ -77,6 +82,8 @@ export class PrismaParksRepository implements ParkRepository {
         name: string
         description: string | null
         city: string
+        category: string
+        source: string
         latitude: number
         longitude: number
         created_at: Date
@@ -91,6 +98,8 @@ export class PrismaParksRepository implements ParkRepository {
         name,
         description,
         city,
+        category,
+        source,
         latitude,
         longitude,
         created_at,
@@ -109,6 +118,8 @@ export class PrismaParksRepository implements ParkRepository {
       )
       AND (${skipFavFilter} OR EXISTS(SELECT 1 FROM user_favorite_parks WHERE "userId" = ${userId} AND "parkId" = parks.id))
       AND (${skipVisFilter} OR EXISTS(SELECT 1 FROM user_visited_parks WHERE "userId" = ${userId} AND "parkId" = parks.id))
+      AND (${skipCategoryFilter} OR category = ${categoryValue}::text)
+      AND (${skipSourceFilter}   OR source   = ${sourceValue}::text)
       ORDER BY distance_m ASC
       LIMIT ${limit}
     `
@@ -134,6 +145,8 @@ export class PrismaParksRepository implements ParkRepository {
         name: row.name,
         description: row.description,
         city: row.city,
+        category: row.category as ParkCategory,
+        source: row.source as ParkSource,
         latitude: row.latitude,
         longitude: row.longitude,
         createdAt: row.created_at,
@@ -154,6 +167,8 @@ export class PrismaParksRepository implements ParkRepository {
       ...(filters?.name ? { name: { contains: filters.name, mode: 'insensitive' } } : {}),
       ...(filters?.favorited ? { favorites: { some: { userId } } } : {}),
       ...(filters?.visited ? { visits: { some: { userId } } } : {}),
+      ...(filters?.category ? { category: filters.category } : {}),
+      ...(filters?.source ? { source: filters.source } : {}),
     }
 
     const [parks, total] = await Promise.all([

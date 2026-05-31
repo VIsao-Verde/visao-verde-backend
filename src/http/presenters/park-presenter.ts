@@ -15,6 +15,8 @@ type HTTPPark = {
   name: string
   description: string | null
   city: string
+  category: string
+  source: string
   latitude: number
   longitude: number
   createdAt: Date
@@ -72,6 +74,8 @@ export class ParkPresenter {
       name: input.name,
       description: input.description,
       city: input.city,
+      category: input.category,
+      source: input.source,
       latitude: input.latitude,
       longitude: input.longitude,
       createdAt: input.createdAt,
@@ -85,6 +89,8 @@ export class ParkPresenter {
       name: park.name,
       description: park.description,
       city: park.city,
+      category: park.category,
+      source: park.source,
       latitude: park.latitude,
       longitude: park.longitude,
       createdAt: park.createdAt,
@@ -109,6 +115,8 @@ export class ParkPresenter {
       name: park.name,
       description: park.description,
       city: park.city,
+      category: park.category,
+      source: park.source,
       latitude: park.latitude,
       longitude: park.longitude,
       createdAt: park.createdAt,
@@ -149,6 +157,8 @@ export class ParkPresenter {
       name: input.name,
       description: input.description,
       city: input.city,
+      category: input.category,
+      source: input.source,
       latitude: input.latitude,
       longitude: input.longitude,
       createdAt: input.createdAt,

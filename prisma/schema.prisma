@@ -129,11 +129,30 @@ model Image {
   @@map("images")
 }
 
+enum ParkCategory {
+  park
+  plaza
+  garden
+  nature_reserve
+  national_park
+  recreation_ground
+}
+
+enum ParkSource {
+  overpass
+  datario
+  icmbio
+  inea
+  manual
+}
+
 model Park {
-  id          String  @id @default(uuid(7))
+  id          String      @id @default(uuid(7))
   name        String
   description String?
   city        String
+  category    ParkCategory @default(park)
+  source      ParkSource   @default(manual)
 
   latitude  Float
   longitude Float
