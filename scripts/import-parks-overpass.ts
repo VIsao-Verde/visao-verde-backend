@@ -514,41 +514,96 @@ function pickBetter(a: ParkEntry, b: ParkEntry): ParkEntry {
   return a.name.length >= b.name.length ? a : b
 }
 
+// ~44 m per cell — 3×3 neighbourhood covers ±88 m, safely catching all ≤50 m pairs
+const GRID_CELL_DEG = 0.0004
+
 function deduplicateParks(parks: ParkEntry[]): ParkEntry[] {
   const deduped: ParkEntry[] = []
+  // normalizedName → indices in deduped (multiple parks can share a name in different cities)
+  const nameIndex = new Map<string, number[]>()
+  // "cx,cy" → indices in deduped
+  const grid = new Map<string, number[]>()
+
+  function cellCoords(lat: number, lon: number): [number, number] {
+    return [Math.floor(lat / GRID_CELL_DEG), Math.floor(lon / GRID_CELL_DEG)]
+  }
+
+  function registerEntry(idx: number, entry: ParkEntry): void {
+    const norm = normalizeName(entry.name)
+    const bucket = nameIndex.get(norm) ?? []
+    bucket.push(idx)
+    nameIndex.set(norm, bucket)
+
+    const [cx, cy] = cellCoords(entry.latitude, entry.longitude)
+    const key = `${cx},${cy}`
+    const cell = grid.get(key) ?? []
+    cell.push(idx)
+    grid.set(key, cell)
+  }
+
+  function unregisterEntry(idx: number, entry: ParkEntry): void {
+    const norm = normalizeName(entry.name)
+    const bucket = nameIndex.get(norm)?.filter((i) => i !== idx)
+    if (bucket?.length) nameIndex.set(norm, bucket)
+    else nameIndex.delete(norm)
+
+    const [cx, cy] = cellCoords(entry.latitude, entry.longitude)
+    const key = `${cx},${cy}`
+    const cell = grid.get(key)?.filter((i) => i !== idx)
+    if (cell?.length) grid.set(key, cell)
+    else grid.delete(key)
+  }
+
+  function neighborCandidates(lat: number, lon: number): number[] {
+    const [cx, cy] = cellCoords(lat, lon)
+    const result: number[] = []
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const cell = grid.get(`${cx + dx},${cy + dy}`)
+        if (cell) result.push(...cell)
+      }
+    }
+    return result
+  }
 
   for (const entry of parks) {
-    const normalizedName = normalizeName(entry.name)
     const { latitude, longitude } = entry
+    const normalizedName = normalizeName(entry.name)
 
-    // Same name within 500 m → keep better one
-    const sameNameIdx = deduped.findIndex(
-      (p) =>
-        normalizeName(p.name) === normalizedName &&
-        haversineMeters(p.latitude, p.longitude, latitude, longitude) <= 500,
+    // Rule 1: same name within 500 m
+    const sameNameMatch = (nameIndex.get(normalizedName) ?? []).find(
+      (i) => haversineMeters(deduped[i].latitude, deduped[i].longitude, latitude, longitude) <= 500,
     )
-    if (sameNameIdx !== -1) {
-      const better = pickBetter(deduped[sameNameIdx], entry)
+    if (sameNameMatch !== undefined) {
+      const existing = deduped[sameNameMatch]
+      const better = pickBetter(existing, entry)
       if (better === entry) {
-        console.log(`  Replacing "${deduped[sameNameIdx].name}" [${deduped[sameNameIdx].source}] with "${entry.name}" [${entry.source}] (same name, better info)`)
-        deduped[sameNameIdx] = entry
+        console.log(`  Replacing "${existing.name}" [${existing.source}] with "${entry.name}" [${entry.source}] (same name, better info)`)
+        unregisterEntry(sameNameMatch, existing)
+        deduped[sameNameMatch] = entry
+        registerEntry(sameNameMatch, entry)
       }
       continue
     }
 
-    // Different name within 50 m → keep better one
-    const nearbyIdx = deduped.findIndex(
-      (p) => haversineMeters(p.latitude, p.longitude, latitude, longitude) <= 50,
+    // Rule 2: different name within 50 m
+    const nearbyMatch = neighborCandidates(latitude, longitude).find(
+      (i) => haversineMeters(deduped[i].latitude, deduped[i].longitude, latitude, longitude) <= 50,
     )
-    if (nearbyIdx !== -1) {
-      const better = pickBetter(deduped[nearbyIdx], entry)
+    if (nearbyMatch !== undefined) {
+      const existing = deduped[nearbyMatch]
+      const better = pickBetter(existing, entry)
       if (better === entry) {
-        console.log(`  Replacing "${deduped[nearbyIdx].name}" [${deduped[nearbyIdx].source}] with "${entry.name}" [${entry.source}] (nearby, better info)`)
-        deduped[nearbyIdx] = entry
+        console.log(`  Replacing "${existing.name}" [${existing.source}] with "${entry.name}" [${entry.source}] (nearby, better info)`)
+        unregisterEntry(nearbyMatch, existing)
+        deduped[nearbyMatch] = entry
+        registerEntry(nearbyMatch, entry)
       }
       continue
     }
 
+    // Unique park
+    registerEntry(deduped.length, entry)
     deduped.push(entry)
   }
 
