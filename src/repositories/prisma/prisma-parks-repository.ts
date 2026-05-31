@@ -1,4 +1,5 @@
 import { prisma } from '@lib/prisma/index.js'
+import { getReviewStats } from '@repositories/prisma/helpers/review-stats.js'
 import type {
   ParkFilters,
   ParkRepository,
@@ -8,36 +9,6 @@ import type {
 import type { Prisma } from '@/@types/prisma/client.js'
 
 export class PrismaParksRepository implements ParkRepository {
-  private async getReviewStats(parkIds: string[]): Promise<Map<string, { count: number; avg: number | null }>> {
-    if (parkIds.length === 0) return new Map()
-
-    const rows = await prisma.$queryRaw<Array<{ park_id: string; count: bigint; avg: number | null }>>`
-      SELECT
-        park_id,
-        COUNT(*) AS count,
-        AVG(CASE rating
-          WHEN 'one' THEN 1
-          WHEN 'two' THEN 2
-          WHEN 'three' THEN 3
-          WHEN 'four' THEN 4
-          WHEN 'five' THEN 5
-        END) AS avg
-      FROM reviews
-      WHERE park_id = ANY(${parkIds}::text[])
-      GROUP BY park_id
-    `
-
-    return new Map(
-      rows.map((r) => [
-        r.park_id,
-        {
-          count: Number(r.count),
-          avg: r.avg !== null ? Math.round(Number(r.avg) * 10) / 10 : null,
-        },
-      ]),
-    )
-  }
-
   async create(data: Prisma.ParkCreateInput) {
     return await prisma.park.create({ data })
   }
@@ -118,7 +89,7 @@ export class PrismaParksRepository implements ParkRepository {
     const parkIds = rows.map((r) => r.id)
     const [images, stats] = await Promise.all([
       prisma.image.findMany({ where: { parkId: { in: parkIds } } }),
-      this.getReviewStats(parkIds),
+      getReviewStats(parkIds),
     ])
     const imagesByPark = new Map<string, typeof images>()
     for (const img of images) {
@@ -169,7 +140,7 @@ export class PrismaParksRepository implements ParkRepository {
 
     const parkIds = parks.map((p) => p.id)
     const [stats, userFavorites, userVisits] = await Promise.all([
-      this.getReviewStats(parkIds),
+      getReviewStats(parkIds),
       prisma.userFavoritePark.findMany({ where: { userId, parkId: { in: parkIds } }, select: { parkId: true } }),
       prisma.userVisitedPark.findMany({ where: { userId, parkId: { in: parkIds } }, select: { parkId: true } }),
     ])

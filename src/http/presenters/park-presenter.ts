@@ -1,4 +1,5 @@
 import type { ParkWithDistance, ParkWithImages, ParkWithRelations } from '@repositories/parks-repository.js'
+import type { FavoriteParkWithDetails } from '@repositories/user-favorite-parks-repository.js'
 import type { Park } from '@/@types/prisma/client.js'
 import type { Rating } from '@/@types/prisma/enums.js'
 
@@ -59,6 +60,11 @@ type HTTPParkWithRelations = HTTPPark & {
 
 type HTTPParkWithDistance = HTTPParkWithImages & { distanceKm: number }
 
+type HTTPFavoritePark = HTTPParkWithImages & {
+  favoritedAt: Date
+  lastVisitedAt: Date | null
+}
+
 export class ParkPresenter {
   static toHTTP(park: Park): HTTPPark
   static toHTTP(parks: Park[]): HTTPPark[]
@@ -94,6 +100,26 @@ export class ParkPresenter {
       averageRating: park.averageRating,
       isFavorited: park.isFavorited,
       isVisited: park.isVisited,
+    }))
+  }
+
+  static toHTTPFavorites(favorites: FavoriteParkWithDetails[]): HTTPFavoritePark[] {
+    return favorites.map((fav) => ({
+      id: fav.id,
+      name: fav.name,
+      description: fav.description,
+      city: fav.city,
+      latitude: fav.latitude,
+      longitude: fav.longitude,
+      createdAt: fav.createdAt,
+      updatedAt: fav.updatedAt,
+      images: fav.images.map((img) => ({ id: img.id, url: img.url, createdAt: img.createdAt })),
+      reviewsCount: fav.reviewsCount,
+      averageRating: fav.averageRating,
+      isFavorited: fav.isFavorited,
+      isVisited: fav.isVisited,
+      favoritedAt: fav.favoritedAt,
+      lastVisitedAt: fav.lastVisitedAt,
     }))
   }
 
