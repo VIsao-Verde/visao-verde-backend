@@ -11,6 +11,7 @@ import { deleteConquest } from './delete-conquest.controller.js'
 import { find } from './find-conquest-controller.js'
 import { list } from './list-conquests.controller.js'
 import { listByUser } from './list-conquests-by-user-id.controller.js'
+import { listMyConquests } from './list-my-conquests.controller.js'
 import { update } from './update-conquest.js'
 
 const doc = (s: z.ZodType) => z.toJSONSchema(s, { unrepresentable: 'any' })
@@ -57,6 +58,19 @@ export async function conquestRoutes(app: FastifyInstance) {
       },
     },
     list,
+  )
+
+  app.get(
+    '/me',
+    {
+      onRequest: [verifyJwt],
+      schema: {
+        tags: ['Conquests'],
+        summary: 'List my conquests',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    listMyConquests,
   )
 
   app.get(
