@@ -155,6 +155,7 @@ model Park {
 
 model Conquest {
   id          String  @id @default(uuid(7))
+  key         String  @unique
   name        String
   description String?
 

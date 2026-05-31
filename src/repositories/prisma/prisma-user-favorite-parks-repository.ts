@@ -26,4 +26,8 @@ export class PrismaUserFavoriteParksRepository implements UserFavoriteParksRepos
       throw error
     }
   }
+
+  async countByUserId(userId: string): Promise<number> {
+    return await prisma.userFavoritePark.count({ where: { userId } })
+  }
 }

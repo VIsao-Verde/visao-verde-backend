@@ -51,7 +51,7 @@ export class PrismaConquestRepository implements ConquestRepository {
 
     const conquests = userConquests.map((userConquest) => ({
       ...userConquest.conquest,
-      user_conquests: [{ achievedAt: userConquest.achievedAt }],
+      user: [{ achievedAt: userConquest.achievedAt }],
     }))
 
     return {
@@ -87,9 +87,19 @@ export class PrismaConquestRepository implements ConquestRepository {
     })
   }
 
-  async delete(id: string) {
-    return await prisma.userConquest.deleteMany({
-      where: { id },
+  async findAll() {
+    return await prisma.conquest.findMany()
+  }
+
+  async findAllEarnedByUserId(userId: string): Promise<string[]> {
+    const userConquests = await prisma.userConquest.findMany({
+      where: { userId },
+      select: { conquestId: true },
     })
+    return userConquests.map((uc) => uc.conquestId)
+  }
+
+  async delete(id: string) {
+    return await prisma.conquest.delete({ where: { id } })
   }
 }
