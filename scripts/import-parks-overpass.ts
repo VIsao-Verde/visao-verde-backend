@@ -58,6 +58,7 @@ const PARK_TYPES = [
   { key: 'boundary', value: 'national_park' },
   { key: 'boundary', value: 'protected_area' },
   { key: 'landuse', value: 'recreation_ground' },
+  { key: 'natural', value: 'wood' },
 ] as const
 
 const BLOCKLIST_PATTERNS = [
@@ -71,6 +72,13 @@ const BLOCKLIST_PATTERNS = [
   /^pico\s/i,
   /\bzona\s+de\s+amortecimento\b/i,
   /\bcorredor\s+ecológico\b/i,
+  /\bfazenda\b/i,
+  /\bsítio\b/i,
+  /\bchácara\b/i,
+  /\bcapoeira\b/i,
+  /\bvegetação\b/i,
+  /\bbioma\b/i,
+  /\batlântica\b/i, // "Mata Atlântica" (bioma, não parque)
 ]
 
 interface OsmTags {
@@ -85,6 +93,7 @@ interface OsmTags {
   leisure?: string
   boundary?: string
   landuse?: string
+  natural?: string
   protect_class?: string
   [key: string]: string | undefined
 }
@@ -140,6 +149,12 @@ function extractCategory(name: string, tags: OsmTags): string {
   if (tags.leisure === 'nature_reserve') return 'nature_reserve'
   if (tags.leisure === 'garden') return 'garden'
   if (tags.landuse === 'recreation_ground') return 'recreation_ground'
+  if (tags.natural === 'wood') {
+    if (/parque\s+nacional/i.test(name)) return 'national_park'
+    if (/parque\s+(estadual|municipal|natural|ecológico)/i.test(name)) return 'park'
+    if (/\b(reserva|floresta|estação\s+ecológica|refúgio|apa\b)/i.test(name)) return 'nature_reserve'
+    return 'park'
+  }
   if (/\bpra[çc]a\b/i.test(name) || /\blargo\b/i.test(name)) return 'plaza'
   return 'park'
 }
