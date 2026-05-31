@@ -5,11 +5,12 @@ import { createConquestSchema } from '@/http/schemas/conquests/create-conquest-s
 import { makeCreateConquestUseCase } from '@/use-cases/factories/make-create-conquest-use-case.js'
 
 export async function create(request: FastifyRequest, reply: FastifyReply) {
-  const { name, description } = createConquestSchema.parse(request.body)
+  const { key, name, description } = createConquestSchema.parse(request.body)
 
   const createConquestUseCase = makeCreateConquestUseCase()
 
   const { conquest } = await createConquestUseCase.execute({
+    key,
     name,
     description,
   })

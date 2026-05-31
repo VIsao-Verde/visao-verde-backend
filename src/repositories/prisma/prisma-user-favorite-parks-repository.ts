@@ -31,6 +31,10 @@ export class PrismaUserFavoriteParksRepository implements UserFavoriteParksRepos
     }
   }
 
+  async countByUserId(userId: string): Promise<number> {
+    return await prisma.userFavoritePark.count({ where: { userId } })
+  }
+
   async list(userId: string, page: number, limit: number) {
     const skip = (page - 1) * limit
 

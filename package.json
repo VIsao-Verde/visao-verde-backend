@@ -48,6 +48,9 @@
       "unrs-resolver"
     ]
   },
+  "prisma": {
+    "seed": "tsx --env-file=.env prisma/seed.ts"
+  },
   "devDependencies": {
     "@biomejs/biome": "latest",
     "@types/node": "25.6.0",

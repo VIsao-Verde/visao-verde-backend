@@ -18,5 +18,6 @@ export interface ReviewRepository {
   findBy(where: Prisma.ReviewWhereUniqueInput): Promise<Review | null>
   listByPark(parkId: string, page: number, limit: number): Promise<{ reviews: ReviewWithUser[]; total: number }>
   listByUser(userId: string, page: number, limit: number): Promise<{ reviews: ReviewWithPark[]; total: number }>
+  countByUserId(userId: string): Promise<number>
   delete(id: string): Promise<Review>
 }

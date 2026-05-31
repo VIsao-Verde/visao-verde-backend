@@ -9,6 +9,7 @@ export type FavoriteParkWithDetails = ParkWithImages & {
 export interface UserFavoriteParksRepository {
   favorite(userId: string, parkId: string): Promise<UserFavoritePark>
   unfavorite(userId: string, parkId: string): Promise<void>
+  countByUserId(userId: string): Promise<number>
   list(
     userId: string,
     page: number,

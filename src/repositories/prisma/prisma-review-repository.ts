@@ -47,6 +47,10 @@ export class PrismaReviewRepository implements ReviewRepository {
     return { reviews, total }
   }
 
+  async countByUserId(userId: string): Promise<number> {
+    return await prisma.review.count({ where: { userId } })
+  }
+
   async delete(id: string) {
     return await prisma.review.delete({ where: { id } })
   }

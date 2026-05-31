@@ -26,4 +26,16 @@ export class PrismaUserVisitedParksRepository implements UserVisitedParksReposit
       throw error
     }
   }
+
+  async countByUserId(userId: string): Promise<number> {
+    return await prisma.userVisitedPark.count({ where: { userId } })
+  }
+
+  async countDistinctCitiesByUserId(userId: string): Promise<number> {
+    const visits = await prisma.userVisitedPark.findMany({
+      where: { userId },
+      include: { park: { select: { city: true } } },
+    })
+    return new Set(visits.map((v) => v.park.city)).size
+  }
 }
