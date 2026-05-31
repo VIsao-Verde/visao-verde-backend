@@ -56,6 +56,7 @@ const PARK_TYPES = [
   { key: 'leisure', value: 'nature_reserve' },
   { key: 'leisure', value: 'garden' },
   { key: 'boundary', value: 'national_park' },
+  { key: 'boundary', value: 'protected_area' },
   { key: 'landuse', value: 'recreation_ground' },
 ] as const
 
@@ -67,7 +68,9 @@ const BLOCKLIST_PATTERNS = [
   /\bloteamento\b/i,
   /\bcondomín/i,
   /\bsítio\s+histórico\b/i,
-  /^pico\s/i, // peaks like "Pico da Tijuca" tagged as leisure=park
+  /^pico\s/i,
+  /\bzona\s+de\s+amortecimento\b/i,
+  /\bcorredor\s+ecológico\b/i,
 ]
 
 interface OsmTags {
@@ -82,6 +85,7 @@ interface OsmTags {
   leisure?: string
   boundary?: string
   landuse?: string
+  protect_class?: string
   [key: string]: string | undefined
 }
 
@@ -113,8 +117,21 @@ ${unions}
 out tags center;`
 }
 
+// IUCN protect_class used by OSM Brazil:
+//   1 = Reserva Natural Estrita / Área Silvestre      → nature_reserve
+//   2 = Parque Nacional/Estadual/Municipal             → national_park or park
+//   3 = Monumento Natural                              → nature_reserve
+//   4 = Refúgio de Vida Silvestre                      → nature_reserve
+//   5 = Paisagem Protegida                             → park
+//   6 = APA / Floresta / RPPN (uso sustentável)        → nature_reserve
 function extractCategory(name: string, tags: OsmTags): string {
   if (tags.boundary === 'national_park') return 'national_park'
+  if (tags.boundary === 'protected_area') {
+    const pc = tags.protect_class ?? ''
+    if (pc === '2') return /nacional/i.test(name) ? 'national_park' : 'park'
+    if (pc === '5') return 'park'
+    return 'nature_reserve'
+  }
   if (tags.leisure === 'nature_reserve') return 'nature_reserve'
   if (tags.leisure === 'garden') return 'garden'
   if (tags.landuse === 'recreation_ground') return 'recreation_ground'
