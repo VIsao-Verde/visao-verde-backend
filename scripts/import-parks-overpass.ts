@@ -614,9 +614,14 @@ function deduplicateParks(parks: ParkEntry[]): ParkEntry[] {
 
 async function main() {
   if (RESET) {
-    console.log('--reset flag detected. Deleting all parks...')
-    const deleted = await prisma.park.deleteMany()
-    console.log(`Deleted ${deleted.count} parks.\n`)
+    console.log('--reset flag detected. Deleting all parks and related data...')
+    const [reviews, trails, images, parks] = await prisma.$transaction([
+      prisma.review.deleteMany(),
+      prisma.trail.deleteMany(),
+      prisma.image.deleteMany(),
+      prisma.park.deleteMany(),
+    ])
+    console.log(`Deleted: ${parks.count} parks, ${reviews.count} reviews, ${trails.count} trails, ${images.count} images.\n`)
   }
 
   const [overpassResult, datarioResult, icmbioResult, ineaResult] = await Promise.allSettled([
