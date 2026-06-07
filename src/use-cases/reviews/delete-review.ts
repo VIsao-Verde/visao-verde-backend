@@ -1,3 +1,4 @@
+import { supabase } from '@lib/supabase/index.js'
 import type { ReviewRepository } from '@repositories/reviews-repository.js'
 import { NotReviewOwnerError } from '@use-cases/errors/not-review-owner-error.js'
 import { ReviewNotFoundError } from '@use-cases/errors/review-not-found-error.js'
@@ -19,6 +20,11 @@ export class DeleteReviewUseCase {
 
     if (userRole !== UserRole.ADMIN && review.userId !== userId) {
       throw new NotReviewOwnerError()
+    }
+
+    if (review.imageUrl) {
+      const storagePath = review.imageUrl.split('/public/park-images/')[1]
+      await supabase.storage.from('park-images').remove([storagePath])
     }
 
     await this.reviewsRepository.delete(id)

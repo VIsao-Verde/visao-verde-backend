@@ -288,7 +288,7 @@ Available scripts:
 ```bash
 pnpm install
 pnpm exec prisma generate
-pnpm exec prisma migrate deploy  # apply migrations (use deploy, not migrate dev — shadow DB lacks PostGIS)
+pnpm exec prisma migrate dev     # create + apply migrations locally (requires local DB running)
 pnpm exec prisma generate        # regenerate client after migration
 pnpm run start:dev               # tsx watch (development)
 pnpm run build                   # tsup production build
@@ -296,7 +296,14 @@ pnpm run lint:fix                # Biome auto-fix
 pnpm run check                   # Biome format + lint
 ```
 
-> **Note:** Always use `prisma migrate deploy` instead of `prisma migrate dev`. The `migrate dev` command creates a shadow database that doesn't have PostGIS installed, causing migrations to fail. After deploying, run `prisma generate` separately.
+> **Local database:** Before running any migration, the local Docker container must be running:
+> ```bash
+> docker start visao-verde-backend-postgres-1
+> ```
+
+> **Production / staging:** Use `prisma migrate deploy` (applies existing migration files without creating new ones or using a shadow DB).
+
+> **PostGIS migrations (new geography columns, triggers, extensions):** `migrate dev` may fail because the auto-created shadow DB does not have PostGIS. In that case, use `migrate dev --create-only` to generate the migration SQL file, edit it manually if needed, then apply with `prisma migrate deploy`.
 
 ---
 

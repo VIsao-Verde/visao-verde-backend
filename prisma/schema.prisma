@@ -60,6 +60,7 @@ model User {
 
   authenticationAudits AuthenticationAudit[]
   reviews              Review[]
+  reviewReports        ReviewReport[]
   coquests             UserConquest[]
   favorites            UserFavoritePark[]
   visits               UserVisitedPark[]
@@ -78,19 +79,35 @@ enum Rating {
 }
 
 model Review {
-  id      String  @id @default(uuid(7))
-  rating  Rating
-  comment String?
+  id       String  @id @default(uuid(7))
+  rating   Rating
+  comment  String?
+  imageUrl String? @map("image_url")
 
   userId String @map("user_id")
   parkId String @map("park_id")
 
-  user User @relation(fields: [userId], references: [id])
-  park Park @relation(fields: [parkId], references: [id])
+  user    User          @relation(fields: [userId], references: [id])
+  park    Park          @relation(fields: [parkId], references: [id])
+  reports ReviewReport[]
 
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("reviews")
+}
+
+model ReviewReport {
+  id       String @id @default(uuid(7))
+  reviewId String @map("review_id")
+  userId   String @map("user_id")
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([reviewId, userId])
+  @@map("review_reports")
 }
 
 enum Difficulty {

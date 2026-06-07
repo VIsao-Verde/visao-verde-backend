@@ -1,8 +1,10 @@
 import type { Prisma, Review } from '@/@types/prisma/client.js'
 
 export interface ReviewData {
+  id?: string
   rating: Prisma.ReviewCreateInput['rating']
   comment?: string
+  imageUrl?: string
 }
 
 export type ReviewWithUser = Prisma.ReviewGetPayload<{

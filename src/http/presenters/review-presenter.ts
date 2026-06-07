@@ -14,6 +14,7 @@ type HTTPReview = {
   id: string
   rating: number
   comment: string | null
+  imageUrl: string | null
   userId: string
   parkId: string
   createdAt: Date
@@ -33,6 +34,7 @@ export class ReviewPresenter {
       id: review.id,
       rating: ratingToNumber[review.rating],
       comment: review.comment,
+      imageUrl: review.imageUrl,
       userId: review.userId,
       parkId: review.parkId,
       createdAt: review.createdAt,
@@ -44,6 +46,7 @@ export class ReviewPresenter {
       id: r.id,
       rating: ratingToNumber[r.rating],
       comment: r.comment,
+      imageUrl: r.imageUrl,
       parkId: r.parkId,
       createdAt: r.createdAt,
       user: { id: r.user.id, name: r.user.name },
@@ -55,6 +58,7 @@ export class ReviewPresenter {
       id: r.id,
       rating: ratingToNumber[r.rating],
       comment: r.comment,
+      imageUrl: r.imageUrl,
       userId: r.userId,
       createdAt: r.createdAt,
       park: { id: r.park.id, name: r.park.name, city: r.park.city },
