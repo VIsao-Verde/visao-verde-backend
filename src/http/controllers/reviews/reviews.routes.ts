@@ -1,5 +1,4 @@
 import { verifyJwt } from '@middlewares/verify-jwt.middleware.js'
-import { createReviewSchema } from '@schemas/reviews/create-review-schema.js'
 import { listReviewsSchema } from '@schemas/reviews/list-reviews-schema.js'
 import { parkIdParamsSchema } from '@schemas/reviews/park-id-params-schema.js'
 import { idSchema } from '@schemas/utils/public-id-schema.js'
@@ -9,6 +8,7 @@ import { createReview } from './create-review.controller.js'
 import { deleteReview } from './delete-review.controller.js'
 import { listMyReviews } from './list-my-reviews.controller.js'
 import { listReviewsByPark } from './list-reviews-by-park.controller.js'
+import { reportReview } from './report-review.controller.js'
 
 const doc = (s: z.ZodType) => z.toJSONSchema(s, { unrepresentable: 'any' })
 
@@ -19,10 +19,9 @@ export async function reviewsRoutes(app: FastifyInstance) {
       onRequest: [verifyJwt],
       schema: {
         tags: ['Reviews'],
-        summary: 'Create a review for a park',
+        summary: 'Create a review for a park (multipart/form-data: rating, comment?, image?)',
         security: [{ bearerAuth: [] }],
         params: doc(parkIdParamsSchema),
-        body: doc(createReviewSchema),
       },
     },
     createReview,
@@ -70,5 +69,20 @@ export async function reviewsRoutes(app: FastifyInstance) {
       },
     },
     deleteReview,
+  )
+
+  app.post(
+    '/reviews/:id/report',
+    {
+      onRequest: [verifyJwt],
+      schema: {
+        tags: ['Reviews'],
+        summary: 'Report a review',
+        description: 'After 5 distinct reports the review is automatically deleted.',
+        security: [{ bearerAuth: [] }],
+        params: doc(idSchema),
+      },
+    },
+    reportReview,
   )
 }
